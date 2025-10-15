@@ -6,11 +6,16 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-bootstrap-key")
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "change-me-devonly")
 
-DEBUG = False
+DEBUG = os.environ.get("DJANGO_DEBUG", "0").lower() in {"1", "true", "yes", "on"}
 
-ALLOWED_HOSTS: list[str] = ["localhost", "127.0.0.1", "0.0.0.0"]
+_default_allowed_hosts = "localhost,127.0.0.1,0.0.0.0"
+ALLOWED_HOSTS: list[str] = [
+    host.strip()
+    for host in os.environ.get("ALLOWED_HOSTS", _default_allowed_hosts).split(",")
+    if host.strip()
+]
 
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
@@ -34,7 +39,7 @@ DATABASES: dict[str, dict[str, str]] = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.environ.get("POSTGRES_DB", "app"),
         "USER": os.environ.get("POSTGRES_USER", "app"),
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "app"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "change-me-devonly"),
         "HOST": os.environ.get("POSTGRES_HOST", "db"),
         "PORT": os.environ.get("POSTGRES_PORT", "5432"),
     }
