@@ -1,15 +1,19 @@
 # Fuel Tracker Bootstrap Service
 
-This repository contains a minimal Django application that responds with a success page and a JSON health check. The service is packaged for local development using Docker Compose.
+This repository contains a minimal Django application packaged for local development with Docker Compose. The service runs
+against a PostgreSQL database, runs migrations on startup, seeds a sentinel record, and exposes a dynamic health endpoint.
 
 ## Running locally
 
-1. Build and start the container:
+1. Build and start the stack:
    ```bash
    docker compose up --build
    ```
-2. Open the service in your browser:
-   - http://localhost:8000/ should display `success`.
-   - http://localhost:8000/health should return `{ "status": "ok" }`.
+2. Verify the service:
+   - http://localhost:8000/ returns the plain text `success` response.
+   - http://localhost:8000/health returns JSON such as
+     ```json
+     {"status":"ok","db":{"connected":true,"migrated":true,"seeded":true}}
+     ```
 
-Use `Ctrl+C` to stop the server when you're done.
+Stopping the containers (`Ctrl+C`) and re-running the command will reuse the named PostgreSQL volume, keeping the seeded data.

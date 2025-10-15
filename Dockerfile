@@ -12,8 +12,8 @@ COPY manage.py ./
 COPY config ./config
 COPY core ./core
 
-RUN pip install --no-cache-dir "Django==4.2.11"
+RUN pip install --no-cache-dir "Django==4.2.11" "psycopg[binary]==3.1.18"
 
 USER app
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["/bin/sh", "-c", "python manage.py migrate --noinput && python manage.py seed_baseline && python manage.py runserver 0.0.0.0:8000"]
