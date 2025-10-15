@@ -2,7 +2,7 @@ Legend: [ ] = todo, [v] = done
 
 [v] 00 — Bootstrap: runnable web service that returns "success" at /
 [v] 01 — Persistence: add database to docker-compose; auto-apply schema and seed baseline data on start
-[ ] 02 — Authentication: sign up/in/out with secure session cookies and CSRF
+[v] 02 — Authentication: sign up/in/out with secure session cookies and CSRF
 [ ] 03 — Profile & Settings: units, currency, timezone; conversions are view-time only (storage stays metric)
 [ ] 04 — Vehicles: add/edit/delete; one user sees only their own data
 [ ] 05 — Fill-Ups: create/edit/delete; validation & integrity rules (monotonic odometer, no future dates)
