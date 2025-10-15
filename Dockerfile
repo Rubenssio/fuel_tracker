@@ -8,9 +8,7 @@ RUN addgroup --system app && adduser --system --ingroup app app
 
 WORKDIR /app
 
-COPY manage.py ./
-COPY config ./config
-COPY core ./core
+COPY . .
 
 RUN pip install --no-cache-dir "Django==4.2.11" "psycopg[binary]==3.1.18"
 
