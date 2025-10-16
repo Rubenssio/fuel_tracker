@@ -41,6 +41,7 @@ class Profile(models.Model):
         default=UNIT_LITERS,
     )
     timezone = models.CharField(max_length=255, default="UTC")
+    utc_offset_minutes = models.IntegerField(default=0)
 
     def __str__(self) -> str:
         return f"Profile for {self.user}"  # pragma: no cover - representation only

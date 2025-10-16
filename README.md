@@ -45,6 +45,6 @@ Authenticated users can manage their profile preferences at `/settings`. The pag
 - Optional display name.
 - Currency code label (3-letter ISO code, used for labelling values only).
 - Preferred distance and volume units for viewing data.
-- Timezone (IANA string such as `UTC`).
+- Preferred UTC offset for display (whole-hour offsets from UTC, stored as `utc_offset_minutes`).
 
-Saving the form refreshes the page with a preview showing sample values (100 km, 50 L, and a currency amount) rendered using the selected preferences. The stored data remains metric; conversions happen only for display.
+Saving the form refreshes the page with a preview showing sample values (100 km, 50 L, and a currency amount) rendered using the selected preferences. The stored data remains metric; conversions happen only for display. Timestamps are saved in UTC; the `utc_offset_minutes` preference will be used for future view-time conversions.
