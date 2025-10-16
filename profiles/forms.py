@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import re
-from zoneinfo import ZoneInfo
 
 from django import forms
 
@@ -12,8 +11,25 @@ from .models import Profile
 _CURRENCY_RE = re.compile(r"^[A-Z]{3}$")
 
 
+def _build_offset_choices() -> list[tuple[int, str]]:
+    choices: list[tuple[int, str]] = []
+    for hour in range(-12, 15):
+        label = f"UTC{hour:+d}"
+        choices.append((hour * 60, label))
+    return choices
+
+
+_UTC_OFFSET_CHOICES = _build_offset_choices()
+
+
 class ProfileForm(forms.ModelForm):
     """Allow users to update their profile preferences."""
+
+    utc_offset_minutes = forms.TypedChoiceField(
+        choices=_UTC_OFFSET_CHOICES,
+        coerce=int,
+        label="Timezone offset",
+    )
 
     class Meta:
         model = Profile
@@ -22,7 +38,7 @@ class ProfileForm(forms.ModelForm):
             "currency",
             "distance_unit",
             "volume_unit",
-            "timezone",
+            "utc_offset_minutes",
         ]
 
     def clean_currency(self) -> str:
@@ -45,10 +61,10 @@ class ProfileForm(forms.ModelForm):
             raise forms.ValidationError("Select a valid volume unit.")
         return volume_unit
 
-    def clean_timezone(self) -> str:
-        timezone = self.cleaned_data["timezone"].strip()
-        try:
-            ZoneInfo(timezone)
-        except Exception as exc:  # pragma: no cover - depends on system tzdata
-            raise forms.ValidationError("Enter a valid IANA timezone.") from exc
-        return timezone
+    def save(self, commit: bool = True) -> Profile:
+        profile: Profile = super().save(commit=False)
+        profile.timezone = "UTC"
+        if commit:
+            profile.save()
+            self.save_m2m()
+        return profile
