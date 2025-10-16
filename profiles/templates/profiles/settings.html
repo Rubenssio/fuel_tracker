@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Settings</title>
+</head>
+<body>
+    <h1>Profile settings</h1>
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div>
+            <label for="id_display_name">Display name:</label>
+            {{ form.display_name }}
+            {% if form.display_name.errors %}
+                <ul>
+                    {% for error in form.display_name.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        <div>
+            <label for="id_currency">Currency (ISO code):</label>
+            {{ form.currency }}
+            {% if form.currency.errors %}
+                <ul>
+                    {% for error in form.currency.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        <div>
+            <label for="id_distance_unit">Distance unit:</label>
+            {{ form.distance_unit }}
+            {% if form.distance_unit.errors %}
+                <ul>
+                    {% for error in form.distance_unit.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        <div>
+            <label for="id_volume_unit">Volume unit:</label>
+            {{ form.volume_unit }}
+            {% if form.volume_unit.errors %}
+                <ul>
+                    {% for error in form.volume_unit.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        <div>
+            <label for="id_timezone">Timezone:</label>
+            {{ form.timezone }}
+            {% if form.timezone.errors %}
+                <ul>
+                    {% for error in form.timezone.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        <button type="submit">Save settings</button>
+    </form>
+    <section>
+        <h2>Preview</h2>
+        <p>Distance sample: {{ preview.distance }}</p>
+        <p>Volume sample: {{ preview.volume }}</p>
+        <p>Currency sample: {{ preview.currency }}</p>
+    </section>
+</body>
+</html>
