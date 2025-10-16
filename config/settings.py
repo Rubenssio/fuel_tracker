@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts.apps.AccountsConfig",
     "core",
+    "profiles.apps.ProfilesConfig",
 ]
 
 MIDDLEWARE: list[str] = [

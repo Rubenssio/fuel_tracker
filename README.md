@@ -37,3 +37,14 @@ Manual test steps:
 2. Visit `/auth/signout` to clear the session (redirects to `/`).
 3. Visit `/auth/signin`, log in with the same credentials, and confirm the redirect back to `/`.
 4. Try passwords that are too short or missing letters/numbers to see the validation errors.
+
+## Profile settings
+
+Authenticated users can manage their profile preferences at `/settings`. The page lets you update:
+
+- Optional display name.
+- Currency code label (3-letter ISO code, used for labelling values only).
+- Preferred distance and volume units for viewing data.
+- Timezone (IANA string such as `UTC`).
+
+Saving the form refreshes the page with a preview showing sample values (100 km, 50 L, and a currency amount) rendered using the selected preferences. The stored data remains metric; conversions happen only for display.
