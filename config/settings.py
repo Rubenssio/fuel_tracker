@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "accounts.apps.AccountsConfig",
     "core",
     "profiles.apps.ProfilesConfig",
+    "vehicles.apps.VehiclesConfig",
 ]
 
 MIDDLEWARE: list[str] = [

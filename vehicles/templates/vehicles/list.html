@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Vehicles</title>
+</head>
+<body>
+    <h1>Your Vehicles</h1>
+
+    <p><a href="/vehicles/add">Add Vehicle</a></p>
+
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if object_list %}
+        <table border="1" cellpadding="4" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Make</th>
+                    <th>Model</th>
+                    <th>Year</th>
+                    <th>Fuel Type</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for object in object_list %}
+                    <tr>
+                        <td>{{ object.name }}</td>
+                        <td>{{ object.make }}</td>
+                        <td>{{ object.model }}</td>
+                        <td>{{ object.year }}</td>
+                        <td>{{ object.fuel_type }}</td>
+                        <td>
+                            <a href="/vehicles/{{ object.pk }}/edit">Edit</a>
+                            <form method="post" action="/vehicles/{{ object.pk }}/delete" style="display:inline">
+                                {% csrf_token %}
+                                <button type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No vehicles yet. Use the link above to add your first vehicle.</p>
+    {% endif %}
+</body>
+</html>

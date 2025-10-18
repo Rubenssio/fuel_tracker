@@ -48,3 +48,11 @@ Authenticated users can manage their profile preferences at `/settings`. The pag
 - Preferred UTC offset for display (whole-hour offsets from UTC, stored as `utc_offset_minutes`).
 
 Saving the form refreshes the page with a preview showing sample values (100 km, 50 L, and a currency amount) rendered using the selected preferences. The stored data remains metric; conversions happen only for display. Timestamps are saved in UTC; the `utc_offset_minutes` preference will be used for future view-time conversions.
+
+## Vehicles
+
+Authenticated users can manage their vehicles from simple server-rendered pages:
+
+- List all vehicles at http://localhost:8000/vehicles.
+- Add a new vehicle at http://localhost:8000/vehicles/add.
+- Edit or delete entries from the list view; deletes are CSRF-protected POST requests.
