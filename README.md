@@ -181,3 +181,105 @@ Manual checks for the reliability and security hardening work completed in step 
 - Open the fill-up creation form and confirm only your vehicles appear in the dropdown, and submissions for other users’ vehicles return a 404.
 - Inspect the response headers for `/` and `/vehicles` and confirm `X-Content-Type-Options` and `Referrer-Policy` are always present. When running with `DJANGO_DEBUG=0`, also confirm a `Content-Security-Policy: default-src 'self'` header is applied.
 - Check `/health` while `DJANGO_DEBUG=0` to confirm the JSON shape matches debug mode and that any `reason` strings remain short and do not reveal stack traces.
+
+## Security, Observability & Ops
+
+### Security headers
+
+The app returns sensible defaults for modern browsers:
+
+- `Content-Security-Policy: default-src 'self'`
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: same-origin`
+- `Permissions-Policy: geolocation=(), microphone=(), camera=()`
+- `Cross-Origin-Opener-Policy: same-origin`
+
+Verify them quickly:
+
+```bash
+curl -I http://localhost:8000/ | egrep 'Content-Security-Policy|X-Content-Type-Options|Referrer-Policy|Permissions-Policy|Cross-Origin-Opener-Policy'
+```
+
+### Request correlation id (X-Request-ID)
+
+Every response includes an `X-Request-ID` header for traceability, and clients may override it by providing the same header. This behavior lives in `core/middleware.py`.
+
+Check the default value:
+
+```bash
+curl -I http://localhost:8000/ | grep -i X-Request-ID
+```
+
+Provide your own ID:
+
+```bash
+curl -I -H 'X-Request-ID: testcid123' http://localhost:8000/
+```
+
+### Auth audit events (login_succeeded / login_failed)
+
+Authentication events are persisted via the `audit` app’s `audit_authevent` table. Inspect recent rows with either a one-liner or the here-doc variant to avoid quoting issues:
+
+```bash
+docker-compose exec db psql -U app -d app -c "SELECT event_type, user_id, email, correlation_id, created_at FROM audit_authevent ORDER BY id DESC LIMIT 10;"
+```
+
+```bash
+docker-compose exec db psql -U app -d app <<'SQL'
+SELECT event_type, user_id, email, correlation_id, created_at
+FROM audit_authevent
+ORDER BY id DESC
+LIMIT 10;
+SQL
+```
+
+To generate fresh events: visit `/auth/signout` to ensure you are logged out, go to `/auth/signin`, submit a valid email with an incorrect password to emit `login_failed`, then authenticate successfully to emit `login_succeeded`. Re-run the query to see the new rows.
+
+### Health endpoint
+
+`/health` returns a JSON payload covering database connectivity, migrations, and seed status. The endpoint responds with `503` when any check is degraded.
+
+Verify the happy path:
+
+```bash
+curl -s http://localhost:8000/health | jq .
+```
+
+Trigger a degraded response by temporarily stopping the database (optional):
+
+```bash
+docker-compose stop db
+curl -i http://localhost:8000/health
+docker-compose start db
+```
+
+### Data isolation
+
+All list and detail views scope queries to `request.user`, and form constructors restrict selectable `vehicle` instances to the current user. Attempting to reference another user’s IDs results in `404` or validation errors. This logic resides in view `get_queryset()` methods and form `__init__` filters across apps such as `vehicles` and `fillups`.
+
+### CSRF & sessions
+
+Django’s `CsrfViewMiddleware` is enabled, template forms render `{% csrf_token %}`, and session cookies inherit Django’s secure defaults. Harden them via environment flags when deploying.
+
+### Secrets & env
+
+Copy `.env.example` to `.env` once, then launch the stack:
+
+```bash
+./scripts/bootstrap-env.sh
+docker compose up --build
+```
+
+Set `DJANGO_SECRET_KEY` in `.env` for production. A development fallback exists but must not be used in production.
+
+### Troubleshooting tips
+
+- For `psql` quoting problems, prefer the here-doc variant shown above.
+- Stream request lifecycle logs:
+  ```bash
+  docker-compose logs -f web | grep request_finished
+  ```
+- Enable local debug mode via `.env`:
+  ```bash
+  DJANGO_DEBUG=1
+  ```
