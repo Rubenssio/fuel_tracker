@@ -99,7 +99,7 @@ All derived values are computed at view time from canonical metric storage; unit
 
 ## Statistics
 
-Explore cost and efficiency trends at http://localhost:8000/statistics. The page offers vehicle and period selectors (30, 90, or year-to-date) and shows:
+Explore cost and efficiency trends at http://localhost:8000/statistics. The page offers vehicle and period selectors (30, 90, year-to-date, or all-time via `?window=all`) and shows:
 
 - Summary cards for the selected window (rolling averages, totals, and per-distance costs).
 - Inline SVG line charts for cost per volume and per-fill consumption.

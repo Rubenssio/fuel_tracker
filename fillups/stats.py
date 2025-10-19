@@ -12,6 +12,8 @@ def window_start_from_param(param: str, today: date) -> date | None:
     """Return the inclusive start date for the requested statistics window."""
 
     normalized = (param or "").strip().lower()
+    if normalized == "all":
+        return None
     if normalized == "90":
         return today - timedelta(days=90)
     if normalized == "ytd":

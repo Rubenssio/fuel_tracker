@@ -464,7 +464,7 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
     CHART_WIDTH = 600
     CHART_HEIGHT = 160
     WINDOW_DEFAULT = "30"
-    WINDOW_CHOICES = {"30", "90", "ytd"}
+    WINDOW_CHOICES = {"30", "90", "ytd", "all"}
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -728,7 +728,7 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
         vehicles = user.vehicles.all().order_by("name")
         selected_vehicle_value = "all" if selected_vehicle_id is None else str(selected_vehicle_id)
 
-        window_options = ["30", "90", "ytd"]
+        window_options = ["30", "90", "ytd", "all"]
 
         context.update(
             {
