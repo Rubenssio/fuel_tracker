@@ -33,6 +33,7 @@ def _ensure_profile(user):
         "currency": "USD",
         "distance_unit": Profile.UNIT_KILOMETERS,
         "volume_unit": Profile.UNIT_LITERS,
+        "efficiency_unit": Profile.EfficiencyUnit.L_PER_100KM,
         "timezone": "UTC",
         "utc_offset_minutes": 0,
     }
@@ -196,6 +197,12 @@ class HistoryListView(LoginRequiredMixin, ListView):
             "volume": "gal" if profile.volume_unit == Profile.UNIT_GALLONS else "L",
             "currency": profile.currency or "USD",
         }
+        efficiency_unit_choice = profile.efficiency_unit
+        efficiency_label = (
+            "MPG"
+            if efficiency_unit_choice == Profile.EfficiencyUnit.MPG
+            else "L/100km"
+        )
 
         page_obj = context.get("page_obj")
         if page_obj is not None:
@@ -246,13 +253,13 @@ class HistoryListView(LoginRequiredMixin, ListView):
             return f"{unit_prefs['currency']} {value:.2f} / {unit_label}"
 
         def _fmt_efficiency(l_per_100km: float | None, mpg: float | None):
-            if unit_prefs["distance"] == "mi" and unit_prefs["volume"] == "gal":
+            if efficiency_unit_choice == Profile.EfficiencyUnit.MPG:
                 if mpg is None:
                     return None
-                return f"{mpg:.1f} MPG"
+                return f"{mpg:.1f} {efficiency_label}"
             if l_per_100km is None:
                 return None
-            return f"{l_per_100km:.1f} L/100km"
+            return f"{l_per_100km:.1f} {efficiency_label}"
 
         def _fmt_cost_per_distance(cost_per_km: Decimal | None, cost_per_mile: Decimal | None):
             currency = unit_prefs["currency"]
@@ -299,6 +306,7 @@ class HistoryListView(LoginRequiredMixin, ListView):
         context["object_list"] = page_fillups
         context[self.context_object_name] = page_fillups
         context["unit_prefs"] = unit_prefs
+        context["efficiency_label"] = efficiency_label
 
         sort_links = {}
         for key in self.SORT_MAP:
@@ -319,6 +327,7 @@ class HistoryListView(LoginRequiredMixin, ListView):
                 "unit_prefs": unit_prefs,
                 "sort_links": sort_links,
                 "base_querystring": base_querystring,
+                "efficiency_label": efficiency_label,
             }
         )
 
@@ -385,6 +394,12 @@ class MetricsView(LoginRequiredMixin, TemplateView):
             "volume": "gal" if prefs.volume_unit == Profile.UNIT_GALLONS else "L",
             "currency": prefs.currency or "USD",
         }
+        efficiency_unit_choice = prefs.efficiency_unit
+        efficiency_label = (
+            "MPG"
+            if efficiency_unit_choice == Profile.EfficiencyUnit.MPG
+            else "L/100km"
+        )
 
         liters_per_gallon = Decimal(str(gallons_to_liters(1.0)))
 
@@ -407,14 +422,14 @@ class MetricsView(LoginRequiredMixin, TemplateView):
                     unit_label = "gal"
                 result["avg_cost_per_volume"] = f"{unit_prefs['currency']} {value:.2f} / {unit_label}"
 
-            if unit_prefs["distance"] == "mi" and unit_prefs["volume"] == "gal":
+            if efficiency_unit_choice == Profile.EfficiencyUnit.MPG:
                 mpg = raw.get("avg_consumption_mpg")
                 if mpg is not None:
-                    result["avg_consumption"] = f"{mpg:.1f} MPG"
+                    result["avg_consumption"] = f"{mpg:.1f} {efficiency_label}"
             else:
                 l_per_100 = raw.get("avg_consumption_l_per_100km")
                 if l_per_100 is not None:
-                    result["avg_consumption"] = f"{l_per_100:.1f} L/100km"
+                    result["avg_consumption"] = f"{l_per_100:.1f} {efficiency_label}"
 
             avg_distance_per_day = raw.get("avg_distance_per_day_km")
             if avg_distance_per_day is not None:
@@ -452,6 +467,7 @@ class MetricsView(LoginRequiredMixin, TemplateView):
                 "rolling_metrics": rolling_display,
                 "all_time_metrics": all_time_display,
                 "unit_prefs": unit_prefs,
+                "efficiency_label": efficiency_label,
             }
         )
 
@@ -478,6 +494,13 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
             "volume": "gal" if profile.volume_unit == Profile.UNIT_GALLONS else "L",
             "currency": profile.currency or "USD",
         }
+        efficiency_unit_choice = profile.efficiency_unit
+        efficiency_label = (
+            "MPG"
+            if efficiency_unit_choice == Profile.EfficiencyUnit.MPG
+            else "L/100km"
+        )
+        use_mpg = efficiency_unit_choice == Profile.EfficiencyUnit.MPG
 
         window_param = request.GET.get("window", self.WINDOW_DEFAULT).lower()
         if window_param not in self.WINDOW_CHOICES:
@@ -515,7 +538,6 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
         summary_raw = aggregate_metrics(entries, window_start=window_start)
 
         liters_per_gallon = Decimal(str(gallons_to_liters(1.0)))
-        is_imperial = unit_prefs["distance"] == "mi" and unit_prefs["volume"] == "gal"
 
         def _format_cost_per_volume(value: Decimal | None) -> str:
             if value is None:
@@ -528,13 +550,13 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
             return f"{unit_prefs['currency']} {converted:.2f} / {unit_label}"
 
         def _format_consumption(avg_l_per_100km: float | None, avg_mpg: float | None) -> str:
-            if is_imperial:
+            if use_mpg:
                 if avg_mpg is None:
                     return "—"
-                return f"{avg_mpg:.1f} MPG"
+                return f"{avg_mpg:.1f} {efficiency_label}"
             if avg_l_per_100km is None:
                 return "—"
-            return f"{avg_l_per_100km:.1f} L/100km"
+            return f"{avg_l_per_100km:.1f} {efficiency_label}"
 
         def _format_cost_per_distance(
             cost_per_km: Decimal | None, cost_per_mile: Decimal | None
@@ -591,7 +613,7 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
             if consumption is None:
                 consumption_series_converted.append((entry_date, None))
                 continue
-            if is_imperial:
+            if use_mpg:
                 gallons = liters_to_gallons(consumption)
                 value: float | None = None
                 if gallons > 0:
@@ -688,7 +710,7 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
             unit_label=f"{unit_prefs['currency']} / {unit_prefs['volume']}",
         )
 
-        consumption_unit = "MPG" if is_imperial else "L/100km"
+        consumption_unit = efficiency_label
         chart_consumption = _build_chart(
             consumption_series_converted,
             precision=1,
@@ -705,15 +727,16 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
             if cost_display == "—" and avg_cost is None:
                 cost_display = "—"
 
-            if avg_consumption is not None and is_imperial:
+            if avg_consumption is None:
+                consumption_display = "—"
+            elif use_mpg:
                 gallons = liters_to_gallons(avg_consumption)
-                consumption_display = "—"
                 if gallons > 0:
-                    consumption_display = f"{miles_per_100km / gallons:.1f} MPG"
-            elif avg_consumption is not None:
-                consumption_display = f"{avg_consumption:.1f} L/100km"
+                    consumption_display = f"{miles_per_100km / gallons:.1f} {efficiency_label}"
+                else:
+                    consumption_display = "—"
             else:
-                consumption_display = "—"
+                consumption_display = f"{avg_consumption:.1f} {efficiency_label}"
 
             brand_rows.append(
                 {
@@ -742,6 +765,7 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
                 "chart_consumption": chart_consumption,
                 "brand_rows": brand_rows,
                 "vehicles": vehicles,
+                "efficiency_label": efficiency_label,
             }
         )
 

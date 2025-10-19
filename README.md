@@ -50,9 +50,10 @@ Authenticated users can manage their profile preferences at `/settings`. The pag
 - Optional display name.
 - Currency code label (3-letter ISO code, used for labelling values only).
 - Preferred distance and volume units for viewing data.
+- Efficiency unit for displaying fuel consumption (choose L/100km or MPG; storage remains metric).
 - Preferred UTC offset for display (whole-hour offsets from UTC, stored as `utc_offset_minutes`).
 
-Saving the form refreshes the page with a preview showing sample values (100 km, 50 L, and a currency amount) rendered using the selected preferences. The stored data remains metric; conversions happen only for display. Timestamps are saved in UTC; the `utc_offset_minutes` preference will be used for future view-time conversions.
+Saving the form refreshes the page with a preview showing sample values (100 km, 50 L, and a currency amount) rendered using the selected preferences. Efficiency output respects the efficiency unit only; distance and volume preferences continue to drive odometer, volume, per-distance cost, and per-volume price labels. The stored data remains metric; conversions happen only for display. Timestamps are saved in UTC; the `utc_offset_minutes` preference will be used for future view-time conversions.
 
 ## Vehicles
 
@@ -72,6 +73,8 @@ Track refueling events for each vehicle with server-rendered forms at:
 Each fill-up stores the odometer reading (kilometers only), volume (liters), and total amount (stored in the currency you enter).
 Validation enforces that liters and total amount are greater than zero, odometer readings stay above zero, fill-up dates are not in the future,
 and odometer readings remain strictly increasing for each vehicle when sorted by date and creation order.
+
+Forms accept odometer and volume inputs in your selected units and convert them back to kilometers and liters before saving.
 
 ## History
 

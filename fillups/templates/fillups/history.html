@@ -81,7 +81,7 @@
                     </th>
                     <th>Dist since last ({{ unit_prefs.distance }})</th>
                     <th>Unit price ({{ unit_prefs.currency }}/{{ unit_prefs.volume }})</th>
-                    <th>Efficiency ({% if unit_prefs.distance == "mi" %}MPG{% else %}L/100km{% endif %})</th>
+                    <th>Efficiency ({{ efficiency_label }})</th>
                     <th>Cost/{{ unit_prefs.distance }}</th>
                     <th>Actions</th>
                 </tr>

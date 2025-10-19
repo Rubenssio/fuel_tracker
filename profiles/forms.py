@@ -30,6 +30,10 @@ class ProfileForm(forms.ModelForm):
         coerce=int,
         label="Timezone offset",
     )
+    efficiency_unit = forms.ChoiceField(
+        choices=Profile.EfficiencyUnit.choices,
+        label="Efficiency unit",
+    )
 
     class Meta:
         model = Profile
@@ -38,6 +42,7 @@ class ProfileForm(forms.ModelForm):
             "currency",
             "distance_unit",
             "volume_unit",
+            "efficiency_unit",
             "utc_offset_minutes",
         ]
 
@@ -60,6 +65,13 @@ class ProfileForm(forms.ModelForm):
         if volume_unit not in valid_units:
             raise forms.ValidationError("Select a valid volume unit.")
         return volume_unit
+
+    def clean_efficiency_unit(self) -> str:
+        efficiency_unit = self.cleaned_data["efficiency_unit"]
+        valid_units = {choice for choice, _ in Profile.EfficiencyUnit.choices}
+        if efficiency_unit not in valid_units:
+            raise forms.ValidationError("Select a valid efficiency unit.")
+        return efficiency_unit
 
     def save(self, commit: bool = True) -> Profile:
         profile: Profile = super().save(commit=False)
