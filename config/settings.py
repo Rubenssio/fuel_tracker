@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "accounts.apps.AccountsConfig",
+    "audit.apps.AuditConfig",
     "core",
     "profiles.apps.ProfilesConfig",
     "vehicles.apps.VehiclesConfig",
@@ -38,12 +39,14 @@ INSTALLED_APPS = [
 
 MIDDLEWARE: list[str] = [
     "django.middleware.security.SecurityMiddleware",
+    "core.middleware.CorrelationIdMiddleware",
     "core.middleware.SecurityHeadersMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "core.logging.FinalizeRequestLoggingMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -111,3 +114,48 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = os.environ.get("DJANGO_SESSION_COOKIE_SECURE", "false").lower() == "true"
 CSRF_COOKIE_SECURE = os.environ.get("DJANGO_CSRF_COOKIE_SECURE", "false").lower() == "true"
 SECURE_SSL_REDIRECT = os.environ.get("DJANGO_SECURE_SSL_REDIRECT", "false").lower() == "true"
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "filters": {
+        "request_context": {
+            "()": "core.logging.RequestContextFilter",
+        }
+    },
+    "formatters": {
+        "structured": {
+            "format": (
+                "ts=%(asctime)s level=%(levelname)s logger=%(name)s "
+                "cid=%(correlation_id)s uid=%(user_id)s "
+                "method=%(request_method)s path=\"%(request_path)s\" "
+                "status=%(status_code)s msg=\"%(message)s\""
+            ),
+            "datefmt": "%Y-%m-%dT%H:%M:%S%z",
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "stream": "ext://sys.stdout",
+            "filters": ["request_context"],
+            "formatter": "structured",
+        }
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "django.server": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}

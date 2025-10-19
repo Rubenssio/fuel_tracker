@@ -146,6 +146,32 @@ docker compose exec web python manage.py showmigrations profiles
 docker compose exec web python manage.py showmigrations vehicles
 ```
 
+## Observability
+
+Inspect structured request logs streamed to stdout:
+
+```
+docker compose logs -f web | grep request_finished
+```
+
+Sample output:
+
+```
+ts=2024-04-10T18:42:13Z level=INFO logger=core.request cid=5f1d6fa85b0d4cb48c8128dbd3e59fa2 uid=1 method=GET path="/health" status=200 msg="request_finished"
+```
+
+Each HTTP response includes the `X-Request-ID` header. Capture it for downstream calls, or override it on inbound requests:
+
+```
+curl -i http://localhost:8000/ | grep -i x-request-id
+```
+
+Authentication audit events are persisted in `audit_authevent`:
+
+```
+docker compose exec db psql -U app -d app -c "SELECT id, event_type, user_id, email, ip_address, LEFT(user_agent, 50) AS user_agent_prefix, correlation_id, created_at FROM audit_authevent ORDER BY id DESC LIMIT 10;"
+```
+
 ## Step 10 verification
 
 Manual checks for the reliability and security hardening work completed in step 10:
