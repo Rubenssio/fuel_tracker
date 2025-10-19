@@ -11,7 +11,7 @@ Legend: [ ] = todo, [v] = done
 [v] 08 — Statistics: overview widgets and charts; brand/grade comparison table; vehicle/period selectors
 [v] 09 — Legal & Account: Terms, Privacy, data export (CSV), account deletion
 [v] 10 — Reliability & Security: user-friendly errors, no stack traces; strict self-data isolation
-[ ] 11 — Observability & Logging: correlation IDs and auth event logs
+[v] 11 — Observability & Logging: correlation IDs and auth event logs
 [ ] 12 — Final pass: clean clone -> docker compose up -> everything reachable and meets performance notes
 
 # UI polish track (run AFTER step 12)
