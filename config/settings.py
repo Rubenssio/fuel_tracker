@@ -2,13 +2,19 @@
 from __future__ import annotations
 
 import os
+import secrets
 from pathlib import Path
 
+DEBUG = os.environ.get("DJANGO_DEBUG", "0").lower() in ("1", "true", "yes", "on")
+
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY") or secrets.token_urlsafe(50)
+
+if not DEBUG and not os.environ.get("DJANGO_SECRET_KEY"):
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured("DJANGO_SECRET_KEY must be set when DEBUG=0.")
+
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "change-me-devonly")
-
-DEBUG = os.environ.get("DJANGO_DEBUG", "0").lower() in {"1", "true", "yes", "on"}
 
 _default_allowed_hosts = "localhost,127.0.0.1,0.0.0.0"
 ALLOWED_HOSTS: list[str] = [
