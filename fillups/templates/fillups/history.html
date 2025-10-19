@@ -79,6 +79,10 @@
                             {% if dir == "asc" %}↑{% else %}↓{% endif %}
                         {% endif %}
                     </th>
+                    <th>Dist since last ({{ unit_prefs.distance }})</th>
+                    <th>Unit price ({{ unit_prefs.currency }}/{{ unit_prefs.volume }})</th>
+                    <th>Efficiency ({% if unit_prefs.distance == "mi" %}MPG{% else %}L/100km{% endif %})</th>
+                    <th>Cost/{{ unit_prefs.distance }}</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -100,6 +104,34 @@
                         <td>{{ fillup.display_odometer }} {{ unit_prefs.distance }}</td>
                         <td>{{ fillup.display_volume }} {{ unit_prefs.volume }}</td>
                         <td>{{ fillup.display_total }}</td>
+                        <td>
+                            {% if fillup._calc.distance_since_last %}
+                                {{ fillup._calc.distance_since_last }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if fillup._calc.unit_price %}
+                                {{ fillup._calc.unit_price }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if fillup._calc.efficiency %}
+                                {{ fillup._calc.efficiency }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if fillup._calc.cost_per_distance %}
+                                {{ fillup._calc.cost_per_distance }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
                         <td>
                             <a href="/fillups/{{ fillup.id }}/edit">Edit</a>
                             <form method="post" action="/fillups/{{ fillup.id }}/delete" style="display:inline">
