@@ -4,7 +4,7 @@ Legend: [ ] = todo, [v] = done
 [v] 01 — Persistence: add database to docker-compose; auto-apply schema and seed baseline data on start
 [v] 02 — Authentication: sign up/in/out with secure session cookies and CSRF
 [v] 03 — Profile & Settings: units, currency, timezone; conversions are view-time only (storage stays metric)
-[ ] 04 — Vehicles: add/edit/delete; one user sees only their own data
+[v] 04 — Vehicles: add/edit/delete; one user sees only their own data
 [ ] 05 — Fill-Ups: create/edit/delete; validation & integrity rules (monotonic odometer, no future dates)
 [ ] 06 — History: list with sorting, pagination, and filters (date/brand/grade/station/vehicle)
 [ ] 07 — Metrics: per-fill calculations and rolling/all-time aggregates; rounding rules
