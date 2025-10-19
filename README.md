@@ -97,6 +97,16 @@ All derived values are computed at view time from canonical metric storage; unit
 - Efficiency: 1 decimal place (`L/100km` in metric or `MPG` in imperial).
 - Distances: whole numbers after conversion to the preferred unit.
 
+## Statistics
+
+Explore cost and efficiency trends at http://localhost:8000/statistics. The page offers vehicle and period selectors (30, 90, or year-to-date) and shows:
+
+- Summary cards for the selected window (rolling averages, totals, and per-distance costs).
+- Inline SVG line charts for cost per volume and per-fill consumption.
+- A brand/grade comparison table with average price, efficiency, and fill-up counts.
+
+Values are calculated from canonical metric storage and converted to your preferred units at render time. Rounding matches the metrics page (currency and per-volume prices to 2 decimals, efficiency to 1 decimal, distances as whole numbers). When no data matches the filters, friendly “No data” messages are displayed instead of charts or tables.
+
 ## Database quick checks (while app is running)
 
 Status and logs:
