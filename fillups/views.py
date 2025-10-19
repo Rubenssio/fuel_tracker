@@ -6,7 +6,7 @@ from types import SimpleNamespace
 from urllib.parse import urlencode
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseNotAllowed
+from django.http import Http404, HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, redirect, resolve_url
 from django.urls import NoReverseMatch
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -16,6 +16,7 @@ from django.views.generic import CreateView, ListView, TemplateView, UpdateView
 
 from profiles.models import Profile
 from profiles.units import gallons_to_liters, km_to_miles, liters_to_gallons
+from core.mixins import OwnedQuerysetMixin
 
 from .forms import FillUpForm
 from .models import FillUp
@@ -110,7 +111,9 @@ class NextRedirectMixin:
         return _safe_next(self.request)
 
 
-class FillUpCreateView(LoginRequiredMixin, FillUpFormContextMixin, NextRedirectMixin, CreateView):
+class FillUpCreateView(
+    LoginRequiredMixin, OwnedQuerysetMixin, FillUpFormContextMixin, NextRedirectMixin, CreateView
+):
     model = FillUp
     form_class = FillUpForm
     template_name = "fillups/form.html"
@@ -121,20 +124,21 @@ class FillUpCreateView(LoginRequiredMixin, FillUpFormContextMixin, NextRedirectM
         return kwargs
 
     def form_valid(self, form):
-        vehicle = form.cleaned_data.get("vehicle")
-        if vehicle and vehicle.user != self.request.user:
-            form.add_error("vehicle", "You do not have permission to use this vehicle.")
-            return self.form_invalid(form)
+        vehicle = form.cleaned_data.get("vehicle") or getattr(form.instance, "vehicle", None)
+        if vehicle is None or vehicle.user != self.request.user:
+            raise Http404()
         return super().form_valid(form)
 
 
-class FillUpUpdateView(LoginRequiredMixin, FillUpFormContextMixin, NextRedirectMixin, UpdateView):
+class FillUpUpdateView(
+    LoginRequiredMixin, OwnedQuerysetMixin, FillUpFormContextMixin, NextRedirectMixin, UpdateView
+):
     model = FillUp
     form_class = FillUpForm
     template_name = "fillups/form.html"
 
     def get_queryset(self):
-        return FillUp.objects.filter(vehicle__user=self.request.user)
+        return super().get_queryset().filter(vehicle__user=self.request.user)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -142,10 +146,9 @@ class FillUpUpdateView(LoginRequiredMixin, FillUpFormContextMixin, NextRedirectM
         return kwargs
 
     def form_valid(self, form):
-        vehicle = form.cleaned_data.get("vehicle")
-        if vehicle and vehicle.user != self.request.user:
-            form.add_error("vehicle", "You do not have permission to use this vehicle.")
-            return self.form_invalid(form)
+        vehicle = form.cleaned_data.get("vehicle") or getattr(form.instance, "vehicle", None)
+        if vehicle is None or vehicle.user != self.request.user:
+            raise Http404()
         return super().form_valid(form)
 
 
@@ -159,7 +162,7 @@ class FillUpDeleteView(LoginRequiredMixin, View):
         return HttpResponseNotAllowed(["POST"])
 
 
-class HistoryListView(LoginRequiredMixin, ListView):
+class HistoryListView(LoginRequiredMixin, OwnedQuerysetMixin, ListView):
     model = FillUp
     template_name = "fillups/history.html"
     paginate_by = 25
@@ -177,8 +180,9 @@ class HistoryListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         request = self.request
+        queryset = super().get_queryset()
         queryset = (
-            FillUp.objects.filter(vehicle__user=request.user)
+            queryset.filter(vehicle__user=request.user)
             .select_related("vehicle")
             .order_by("-date", "-id")
         )

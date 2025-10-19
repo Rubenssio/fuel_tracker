@@ -22,3 +22,8 @@ urlpatterns = [
     path("", include("vehicles.urls")),
     path("", include("fillups.urls")),
 ]
+
+handler400 = "config.views.error_400"
+handler403 = "config.views.error_403"
+handler404 = "config.views.error_404"
+handler500 = "config.views.error_500"
