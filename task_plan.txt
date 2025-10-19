@@ -13,3 +13,13 @@ Legend: [ ] = todo, [v] = done
 [ ] 10 — Reliability & Security: user-friendly errors, no stack traces; strict self-data isolation
 [ ] 11 — Observability & Logging: correlation IDs and auth event logs
 [ ] 12 — Final pass: clean clone -> docker compose up -> everything reachable and meets performance notes
+
+# UI polish track (run AFTER step 12)
+[ ] UI-01 — Base layout & style system: consistent spacing, typography scale, button/link states, alert/message components
+[ ] UI-02 — Forms UX: inline validation errors, required markers, helpful placeholders/help-text, success/flash messages
+[ ] UI-03 — Lists & tables: consistent table layout, empty states, basic sorting affordances, clear action buttons
+[ ] UI-04 — Navigation & headers: tidy page titles/breadcrumbs, highlight active section, mobile-friendly nav
+[ ] UI-05 — Responsive behavior: small/medium/large breakpoints; ensure core flows usable on phones
+[ ] UI-06 — Accessibility baseline: semantic landmarks, labels for inputs, focus order, keyboard use, color contrast checks
+[ ] UI-07 — Visual consistency pass: normalize margins/paddings, iconography placeholders, consistent component variants
+[ ] UI-08 — Final UI check: screenshots of key pages, quick perf sanity (image sizes, minimal blocking assets)
