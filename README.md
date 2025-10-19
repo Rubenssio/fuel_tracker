@@ -22,6 +22,11 @@ After the stack is up, verify the service:
      ```
 
 Stopping the containers (`Ctrl+C`) and re-running the command will reuse the named PostgreSQL volume, keeping the seeded data.
+To reset everything (including the database volume), run:
+
+```bash
+docker compose down -v
+```
 
 ## Auth
 
