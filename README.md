@@ -182,6 +182,34 @@ Manual checks for the reliability and security hardening work completed in step 
 - Inspect the response headers for `/` and `/vehicles` and confirm `X-Content-Type-Options` and `Referrer-Policy` are always present. When running with `DJANGO_DEBUG=0`, also confirm a `Content-Security-Policy: default-src 'self'` header is applied.
 - Check `/health` while `DJANGO_DEBUG=0` to confirm the JSON shape matches debug mode and that any `reason` strings remain short and do not reveal stack traces.
 
+## Final Pass (Step 12) — How to verify
+
+Use these steps to confirm a clean environment can boot and meet our lightweight performance checks.
+
+1. Start from a clean checkout and base environment:
+   ```bash
+   git clone <repo>
+   cd fuel_tracker
+   ./scripts/bootstrap-env.sh
+   docker compose down -v
+   docker compose up --build
+   ```
+2. (Optional) Seed high-volume demo data and run the lightweight perf check:
+   ```bash
+   docker compose exec web python manage.py seed_perf_data --email demo@example.com --vehicles 2 --fillups 5000
+   docker compose exec web python manage.py perf_check --email demo@example.com --vehicle all
+   ```
+3. Smoke test the key endpoints (200 or 302 responses are accepted):
+   ```bash
+   ./scripts/smoke-endpoints.sh
+   ```
+4. Inspect PostgreSQL indexes to confirm the expected naming convention (`ix_*`) is present:
+   ```bash
+   docker compose exec db psql -U app -d app -c "\di+ ix_*"
+   ```
+
+Targets: first meaningful content should appear within roughly two seconds, and History/Statistics queries should comfortably handle ~5,000 fill-ups within ~500 ms server-side. The commands above provide a quick local sanity check; no additional tooling is required.
+
 ## Security, Observability & Ops
 
 ### Security headers

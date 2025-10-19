@@ -45,7 +45,7 @@ def _ensure_profile(user):
 class FillUpFormContextMixin:
     def _option_values(self, field_name: str) -> list[str]:
         queryset = (
-            FillUp.objects.filter(vehicle__user=self.request.user)
+            FillUp.objects.filter(user=self.request.user)
             .exclude(**{field_name: ""})
             .order_by()
             .values_list(field_name, flat=True)
@@ -97,7 +97,7 @@ class FillUpUpdateView(LoginRequiredMixin, OwnedQuerysetMixin, FillUpFormContext
     template_name = "fillups/form.html"
 
     def get_queryset(self):
-        return super().get_queryset().filter(vehicle__user=self.request.user)
+        return super().get_queryset().filter(user=self.request.user)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -122,7 +122,7 @@ class FillUpUpdateView(LoginRequiredMixin, OwnedQuerysetMixin, FillUpFormContext
 
 class FillUpDeleteView(LoginRequiredMixin, View):
     def post(self, request, pk):
-        obj = get_object_or_404(FillUp, pk=pk, vehicle__user=request.user)
+        obj = get_object_or_404(FillUp, pk=pk, user=request.user)
         obj.delete()
         return redirect(sanitize_next(request.POST.get("next"), default="/history"))
 
@@ -150,7 +150,7 @@ class HistoryListView(LoginRequiredMixin, OwnedQuerysetMixin, ListView):
         request = self.request
         queryset = super().get_queryset()
         queryset = (
-            queryset.filter(vehicle__user=request.user)
+            queryset.filter(user=request.user)
             .select_related("vehicle")
             .order_by("-date", "-id")
         )
@@ -313,7 +313,7 @@ class HistoryListView(LoginRequiredMixin, OwnedQuerysetMixin, ListView):
             vehicle_ids = {fillup.vehicle_id for fillup in page_fillups}
             if vehicle_ids:
                 all_vehicle_entries = (
-                    FillUp.objects.filter(vehicle__user=user, vehicle_id__in=vehicle_ids)
+                    FillUp.objects.filter(user=user, vehicle_id__in=vehicle_ids)
                     .select_related("vehicle")
                     .order_by("vehicle_id", "date", "id")
                 )
@@ -356,21 +356,21 @@ class HistoryListView(LoginRequiredMixin, OwnedQuerysetMixin, ListView):
         base_querystring = self._build_querystring()
 
         brand_options = (
-            FillUp.objects.filter(vehicle__user=user)
+            FillUp.objects.filter(user=user)
             .exclude(fuel_brand="")
             .values_list("fuel_brand", flat=True)
             .distinct()
             .order_by("fuel_brand")
         )
         grade_options = (
-            FillUp.objects.filter(vehicle__user=user)
+            FillUp.objects.filter(user=user)
             .exclude(fuel_grade="")
             .values_list("fuel_grade", flat=True)
             .distinct()
             .order_by("fuel_grade")
         )
         station_options = (
-            FillUp.objects.filter(vehicle__user=user)
+            FillUp.objects.filter(user=user)
             .exclude(station_name="")
             .values_list("station_name", flat=True)
             .distinct()
@@ -439,7 +439,7 @@ class MetricsView(LoginRequiredMixin, TemplateView):
                     vehicle_param = "all"
 
         queryset = (
-            FillUp.objects.filter(vehicle__user=user)
+            FillUp.objects.filter(user=user)
             .select_related("vehicle")
             .order_by("vehicle_id", "date", "id")
         )
@@ -585,7 +585,7 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
                     vehicle_param = "all"
 
         queryset = (
-            FillUp.objects.filter(vehicle__user=user)
+            FillUp.objects.filter(user=user)
             .select_related("vehicle")
             .order_by("vehicle_id", "date", "id")
         )
