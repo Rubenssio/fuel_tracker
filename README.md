@@ -110,6 +110,18 @@ Explore cost and efficiency trends at http://localhost:8000/statistics. The page
 
 Values are calculated from canonical metric storage and converted to your preferred units at render time. Rounding matches the metrics page (currency and per-volume prices to 2 decimals, efficiency to 1 decimal, distances as whole numbers). When no data matches the filters, friendly “No data” messages are displayed instead of charts or tables.
 
+## UI quick check
+
+```bash
+docker compose up
+```
+
+Then visit `http://localhost:8000/` in your browser and confirm:
+
+- The header navigation reflects your auth state (anonymous vs. signed-in) and highlights the current page.
+- Forms such as `/auth/signin`, `/vehicles/add`, and `/fillups/add` render with consistent labels, inputs, and buttons.
+- Tables on `/vehicles`, `/history`, and `/statistics` display stripes, responsive labels, and aligned numeric columns.
+
 ## Database quick checks (while app is running)
 
 Status and logs:
