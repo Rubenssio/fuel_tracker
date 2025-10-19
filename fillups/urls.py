@@ -6,6 +6,7 @@ from .views import (
     FillUpUpdateView,
     HistoryListView,
     MetricsView,
+    StatisticsView,
 )
 
 urlpatterns = [
@@ -14,4 +15,5 @@ urlpatterns = [
     path("fillups/<int:pk>/edit", FillUpUpdateView.as_view(), name="fillup-edit"),
     path("fillups/<int:pk>/delete", FillUpDeleteView.as_view(), name="fillup-delete"),
     path("metrics", MetricsView.as_view(), name="metrics"),
+    path("statistics", StatisticsView.as_view(), name="statistics"),
 ]

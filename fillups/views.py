@@ -19,6 +19,13 @@ from profiles.units import gallons_to_liters, km_to_miles, liters_to_gallons
 from .forms import FillUpForm
 from .models import FillUp
 from .metrics import aggregate_metrics, per_fill_metrics
+from .stats import (
+    brand_grade_summary,
+    timeseries_consumption,
+    timeseries_cost_per_liter,
+    to_svg_path,
+    window_start_from_param,
+)
 
 
 def _ensure_profile(user):
@@ -445,6 +452,296 @@ class MetricsView(LoginRequiredMixin, TemplateView):
                 "rolling_metrics": rolling_display,
                 "all_time_metrics": all_time_display,
                 "unit_prefs": unit_prefs,
+            }
+        )
+
+        return context
+
+
+class StatisticsView(LoginRequiredMixin, TemplateView):
+    template_name = "fillups/statistics.html"
+
+    CHART_WIDTH = 600
+    CHART_HEIGHT = 160
+    WINDOW_DEFAULT = "30"
+    WINDOW_CHOICES = {"30", "90", "ytd"}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        request = self.request
+        user = request.user
+        profile = _ensure_profile(user)
+
+        unit_prefs = {
+            "distance": "mi" if profile.distance_unit == Profile.UNIT_MILES else "km",
+            "volume": "gal" if profile.volume_unit == Profile.UNIT_GALLONS else "L",
+            "currency": profile.currency or "USD",
+        }
+
+        window_param = request.GET.get("window", self.WINDOW_DEFAULT).lower()
+        if window_param not in self.WINDOW_CHOICES:
+            window_param = self.WINDOW_DEFAULT
+
+        today = date.today()
+        window_start = window_start_from_param(window_param, today)
+
+        vehicle_param = request.GET.get("vehicle", "all").strip() or "all"
+        selected_vehicle_id: int | None = None
+        if vehicle_param != "all":
+            try:
+                candidate_id = int(vehicle_param)
+            except (TypeError, ValueError):
+                vehicle_param = "all"
+            else:
+                if user.vehicles.filter(id=candidate_id).exists():
+                    selected_vehicle_id = candidate_id
+                else:
+                    vehicle_param = "all"
+
+        queryset = (
+            FillUp.objects.filter(vehicle__user=user)
+            .select_related("vehicle")
+            .order_by("vehicle_id", "date", "id")
+        )
+        if selected_vehicle_id is not None:
+            queryset = queryset.filter(vehicle_id=selected_vehicle_id)
+
+        entries = list(queryset)
+        window_entries = [
+            entry for entry in entries if window_start is None or entry.date >= window_start
+        ]
+
+        summary_raw = aggregate_metrics(entries, window_start=window_start)
+
+        liters_per_gallon = Decimal(str(gallons_to_liters(1.0)))
+        is_imperial = unit_prefs["distance"] == "mi" and unit_prefs["volume"] == "gal"
+
+        def _format_cost_per_volume(value: Decimal | None) -> str:
+            if value is None:
+                return "—"
+            converted = value
+            unit_label = "L"
+            if unit_prefs["volume"] == "gal":
+                converted = value * liters_per_gallon
+                unit_label = "gal"
+            return f"{unit_prefs['currency']} {converted:.2f} / {unit_label}"
+
+        def _format_consumption(avg_l_per_100km: float | None, avg_mpg: float | None) -> str:
+            if is_imperial:
+                if avg_mpg is None:
+                    return "—"
+                return f"{avg_mpg:.1f} MPG"
+            if avg_l_per_100km is None:
+                return "—"
+            return f"{avg_l_per_100km:.1f} L/100km"
+
+        def _format_cost_per_distance(
+            cost_per_km: Decimal | None, cost_per_mile: Decimal | None
+        ) -> str:
+            currency = unit_prefs["currency"]
+            if unit_prefs["distance"] == "mi":
+                if cost_per_mile is None:
+                    return "—"
+                return f"{currency} {cost_per_mile:.2f} / mi"
+            if cost_per_km is None:
+                return "—"
+            return f"{currency} {cost_per_km:.2f} / km"
+
+        total_distance_value = summary_raw.get("total_distance_km", 0.0) or 0.0
+        if unit_prefs["distance"] == "mi":
+            total_distance_value = km_to_miles(total_distance_value)
+
+        avg_distance_per_day = summary_raw.get("avg_distance_per_day_km")
+        if avg_distance_per_day is not None and unit_prefs["distance"] == "mi":
+            avg_distance_per_day = km_to_miles(avg_distance_per_day)
+
+        summary = {
+            "avg_consumption": _format_consumption(
+                summary_raw.get("avg_consumption_l_per_100km"),
+                summary_raw.get("avg_consumption_mpg"),
+            ),
+            "avg_cost_per_volume": _format_cost_per_volume(
+                summary_raw.get("avg_cost_per_liter")
+            ),
+            "total_spend": f"{unit_prefs['currency']} {summary_raw.get('total_spend', Decimal('0')):.2f}",
+            "total_distance": f"{int(round(total_distance_value))} {unit_prefs['distance']}",
+            "avg_cost_per_distance": _format_cost_per_distance(
+                summary_raw.get("avg_cost_per_km"), summary_raw.get("avg_cost_per_mile")
+            ),
+            "avg_distance_per_day": (
+                f"{int(round(avg_distance_per_day))} {unit_prefs['distance']}/day"
+                if avg_distance_per_day is not None
+                else "—"
+            ),
+        }
+
+        cost_series_raw = timeseries_cost_per_liter(window_entries)
+        cost_series_converted: list[tuple[date, float]] = []
+        for entry_date, price_per_liter in cost_series_raw:
+            converted = price_per_liter
+            if unit_prefs["volume"] == "gal":
+                converted = price_per_liter * liters_per_gallon
+            cost_series_converted.append((entry_date, float(converted)))
+
+        consumption_series_raw = timeseries_consumption(window_entries)
+        consumption_series_converted: list[tuple[date, float | None]] = []
+        miles_per_100km = km_to_miles(100.0)
+        for entry_date, consumption in consumption_series_raw:
+            if consumption is None:
+                consumption_series_converted.append((entry_date, None))
+                continue
+            if is_imperial:
+                gallons = liters_to_gallons(consumption)
+                value: float | None = None
+                if gallons > 0:
+                    value = miles_per_100km / gallons
+                consumption_series_converted.append((entry_date, value))
+            else:
+                consumption_series_converted.append((entry_date, consumption))
+
+        def _build_chart(
+            series: list[tuple[date, float | None]],
+            precision: int,
+            unit_label: str,
+        ) -> dict:
+            cleaned_with_index = [
+                (d, v, idx) for idx, (d, v) in enumerate(series) if v is not None
+            ]
+            if not cleaned_with_index:
+                return {
+                    "points": [],
+                    "path": "",
+                    "x_labels": [],
+                    "y_min": None,
+                    "y_max": None,
+                    "unit_label": unit_label,
+                    "has_data": False,
+                    "width": self.CHART_WIDTH,
+                    "height": self.CHART_HEIGHT,
+                }
+
+            cleaned_with_index.sort(key=lambda item: (item[0], item[2]))
+            dates = [item[0] for item in cleaned_with_index]
+            values = [item[1] for item in cleaned_with_index]
+
+            min_date = min(dates)
+            max_date = max(dates)
+            min_value = min(values)
+            max_value = max(values)
+
+            points: list[tuple[float, float]] = []
+            if max_date == min_date:
+                x_positions = [self.CHART_WIDTH / 2.0] * len(cleaned)
+            else:
+                total_days = (max_date - min_date).days
+                if total_days == 0:
+                    total_days = 1
+                x_positions = [
+                    ((d - min_date).days / total_days) * self.CHART_WIDTH for d in dates
+                ]
+
+            if max_value == min_value:
+                points = [(x, self.CHART_HEIGHT / 2.0) for x in x_positions]
+            else:
+                value_range = max_value - min_value
+                scale = self.CHART_HEIGHT / value_range
+                for x, value in zip(x_positions, values):
+                    y = self.CHART_HEIGHT - ((value - min_value) * scale)
+                    points.append((x, y))
+
+            if not points:
+                points = [(x_positions[0], self.CHART_HEIGHT / 2.0)]
+
+            unique_dates = []
+            for candidate in sorted(set(dates)):
+                label = candidate.strftime("%b %d")
+                unique_dates.append(label)
+
+            labels: list[str] = []
+            if unique_dates:
+                labels.append(unique_dates[0])
+                if len(unique_dates) > 2:
+                    middle = unique_dates[len(unique_dates) // 2]
+                    if middle not in {unique_dates[0], unique_dates[-1]}:
+                        labels.append(middle)
+                if len(unique_dates) > 1:
+                    labels.append(unique_dates[-1])
+
+            path = to_svg_path(points)
+
+            return {
+                "points": points,
+                "path": path,
+                "x_labels": labels,
+                "y_min": f"{min_value:.{precision}f}",
+                "y_max": f"{max_value:.{precision}f}",
+                "unit_label": unit_label,
+                "has_data": True,
+                "width": self.CHART_WIDTH,
+                "height": self.CHART_HEIGHT,
+            }
+
+        chart_cost = _build_chart(
+            [(d, v) for d, v in cost_series_converted],
+            precision=2,
+            unit_label=f"{unit_prefs['currency']} / {unit_prefs['volume']}",
+        )
+
+        consumption_unit = "MPG" if is_imperial else "L/100km"
+        chart_consumption = _build_chart(
+            consumption_series_converted,
+            precision=1,
+            unit_label=consumption_unit,
+        )
+
+        brand_rows = []
+        raw_brand_rows = brand_grade_summary(window_entries)
+        for row in raw_brand_rows:
+            avg_cost = row.get("avg_cost_per_liter")
+            avg_consumption = row.get("avg_consumption_l_per_100km")
+
+            cost_display = _format_cost_per_volume(avg_cost)
+            if cost_display == "—" and avg_cost is None:
+                cost_display = "—"
+
+            if avg_consumption is not None and is_imperial:
+                gallons = liters_to_gallons(avg_consumption)
+                consumption_display = "—"
+                if gallons > 0:
+                    consumption_display = f"{miles_per_100km / gallons:.1f} MPG"
+            elif avg_consumption is not None:
+                consumption_display = f"{avg_consumption:.1f} L/100km"
+            else:
+                consumption_display = "—"
+
+            brand_rows.append(
+                {
+                    "brand": row.get("brand") or "—",
+                    "grade": row.get("grade") or "—",
+                    "avg_cost_per_volume": cost_display,
+                    "avg_consumption": consumption_display,
+                    "count": row.get("count", 0),
+                }
+            )
+
+        vehicles = user.vehicles.all().order_by("name")
+        selected_vehicle_value = "all" if selected_vehicle_id is None else str(selected_vehicle_id)
+
+        window_options = ["30", "90", "ytd"]
+
+        context.update(
+            {
+                "unit_prefs": unit_prefs,
+                "selected_vehicle_id": selected_vehicle_id,
+                "selected_vehicle": selected_vehicle_value,
+                "selected_window": window_param,
+                "window_options": window_options,
+                "summary": summary,
+                "chart_cost": chart_cost,
+                "chart_consumption": chart_consumption,
+                "brand_rows": brand_rows,
+                "vehicles": vehicles,
             }
         )
 
