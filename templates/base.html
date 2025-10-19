@@ -6,8 +6,22 @@
 </head>
 <body>
     {% include "partials/nav.html" %}
+    {% if messages %}
+        <div class="messages">
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
     <main>
         {% block content %}{% endblock %}
     </main>
+    <footer>
+        <a href="/legal/terms">Terms</a>
+        <span>|</span>
+        <a href="/legal/privacy">Privacy</a>
+    </footer>
 </body>
 </html>
