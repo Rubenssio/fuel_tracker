@@ -41,6 +41,17 @@ class FillUpForm(forms.ModelForm):
         self.profile: Profile | None = None
         super().__init__(*args, **kwargs)
 
+        datalist_attrs = {
+            "fuel_brand": "brand-options",
+            "fuel_grade": "grade-options",
+            "station_name": "station-options",
+        }
+        for field_name, datalist_id in datalist_attrs.items():
+            field = self.fields.get(field_name)
+            if field is not None:
+                field.widget.attrs["list"] = datalist_id
+                field.widget.attrs.setdefault("placeholder", field.label)
+
         if user is not None:
             defaults = {
                 "currency": "USD",

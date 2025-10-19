@@ -9,36 +9,30 @@
         {% for field in form %}
             <p>
                 {{ field.label_tag }}
+                {{ field }}
                 {% if field.name == "fuel_brand" %}
-                    {{ field.as_widget(attrs={"list": "brand-options"}) }}
                     <datalist id="brand-options">
                         {% for value in brand_options %}
                             <option value="{{ value }}"></option>
                         {% endfor %}
                     </datalist>
                 {% elif field.name == "fuel_grade" %}
-                    {{ field.as_widget(attrs={"list": "grade-options"}) }}
                     <datalist id="grade-options">
                         {% for value in grade_options %}
                             <option value="{{ value }}"></option>
                         {% endfor %}
                     </datalist>
                 {% elif field.name == "station_name" %}
-                    {{ field.as_widget(attrs={"list": "station-options"}) }}
                     <datalist id="station-options">
                         {% for value in station_options %}
                             <option value="{{ value }}"></option>
                         {% endfor %}
                     </datalist>
-                {% else %}
-                    {{ field }}
                 {% endif %}
+                {{ field.errors }}
                 {% if field.help_text %}
                     <small>{{ field.help_text }}</small>
                 {% endif %}
-                {% for error in field.errors %}
-                    <span class="error">{{ error }}</span>
-                {% endfor %}
             </p>
         {% endfor %}
         <button type="submit">Save</button>
