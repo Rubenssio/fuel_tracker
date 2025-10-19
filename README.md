@@ -73,6 +73,14 @@ Each fill-up stores the odometer reading (kilometers only), volume (liters), and
 Validation enforces that liters and total amount are greater than zero, odometer readings stay above zero, fill-up dates are not in the future,
 and odometer readings remain strictly increasing for each vehicle when sorted by date and creation order.
 
+## History
+
+Browse all fill-ups for the signed-in user at http://localhost:8000/history. Use query parameters to narrow results, for example:
+
+- `/history?vehicle=3&start=2025-09-01&end=2025-10-19`
+- `/history?brand=Shell&grade=Premium`
+- `/history?station=Chevron&sort=total&dir=desc`
+
 ## Database quick checks (while app is running)
 
 Status and logs:
