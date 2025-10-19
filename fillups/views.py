@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections import defaultdict
 from datetime import date, timedelta
 from types import SimpleNamespace
 from urllib.parse import urlencode
@@ -15,11 +14,23 @@ from django.views import View
 from django.views.generic import CreateView, ListView, TemplateView, UpdateView
 
 from profiles.models import Profile
-from profiles.units import km_to_miles, liters_to_gallons
+from profiles.units import LITERS_PER_GALLON, km_to_miles, liters_to_gallons
 
 from .forms import FillUpForm
 from .models import FillUp
-from .metrics import aggregate_metrics, per_fill_metrics, round_for_display
+from .metrics import aggregate_metrics, per_fill_metrics
+
+
+def _ensure_profile(user):
+    defaults = {
+        "currency": "USD",
+        "distance_unit": Profile.UNIT_KILOMETERS,
+        "volume_unit": Profile.UNIT_LITERS,
+        "timezone": "UTC",
+        "utc_offset_minutes": 0,
+    }
+    profile, _ = Profile.objects.get_or_create(user=user, defaults=defaults)
+    return profile
 
 
 class FillUpCreateView(LoginRequiredMixin, CreateView):
@@ -172,76 +183,109 @@ class HistoryListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
 
         user = self.request.user
-        profile = getattr(user, "profile", None)
-        prefs = profile or SimpleNamespace(
-            distance_unit=Profile.UNIT_KILOMETERS,
-            volume_unit=Profile.UNIT_LITERS,
-            currency="USD",
-        )
+        profile = _ensure_profile(user)
         unit_prefs = {
-            "distance": prefs.distance_unit,
-            "volume": prefs.volume_unit,
-            "currency": prefs.currency,
+            "distance": "mi" if profile.distance_unit == Profile.UNIT_MILES else "km",
+            "volume": "gal" if profile.volume_unit == Profile.UNIT_GALLONS else "L",
+            "currency": profile.currency or "USD",
         }
 
-        fillups = context.get("fillups", [])
+        page_obj = context.get("page_obj")
+        if page_obj is not None:
+            page_fillups = list(page_obj.object_list)
+        else:
+            page_fillups = list(context.get("fillups", []))
 
-        for fillup in fillups:
-            fillup._calc = round_for_display({}, prefs)
+        fillup_by_id = {fillup.id: fillup for fillup in page_fillups}
 
-        vehicle_groups: dict[int, list] = defaultdict(list)
-        for fillup in fillups:
-            vehicle_groups[fillup.vehicle_id].append(fillup)
-
-        for vehicle_id, vehicle_fillups in vehicle_groups.items():
-            sorted_fillups = sorted(vehicle_fillups, key=lambda entry: (entry.date, entry.id))
-            baseline_entry = sorted_fillups[0]
-
-            previous_entry = (
-                FillUp.objects.filter(vehicle_id=vehicle_id, vehicle__user=user)
-                .filter(
-                    Q(date__lt=baseline_entry.date)
-                    | Q(date=baseline_entry.date, id__lt=baseline_entry.id)
-                )
-                .order_by("-date", "-id")
-                .first()
+        for fillup in page_fillups:
+            fillup._calc = SimpleNamespace(
+                distance_since_last=None,
+                unit_price=None,
+                efficiency=None,
+                cost_per_distance=None,
             )
 
-            entries_for_metrics = []
-            if previous_entry is not None:
-                entries_for_metrics.append(previous_entry)
-            entries_for_metrics.extend(sorted_fillups)
-
-            metrics = per_fill_metrics(entries_for_metrics)
-            metrics_by_id = {item.fillup.id: item for item in metrics if item.fillup in vehicle_fillups}
-
-            for fillup in vehicle_fillups:
-                per_fill = metrics_by_id.get(fillup.id)
-                if per_fill:
-                    fillup._calc = round_for_display(
-                        {
-                            "distance_since_last_km": per_fill.distance_since_last_km,
-                            "unit_price_per_liter": per_fill.unit_price_per_liter,
-                            "efficiency_l_per_100km": per_fill.efficiency_l_per_100km,
-                            "efficiency_mpg": per_fill.efficiency_mpg,
-                            "cost_per_km": per_fill.cost_per_km,
-                            "cost_per_mile": per_fill.cost_per_mile,
-                        },
-                        prefs,
-                    )
-
-        for fillup in fillups:
             distance_value = float(fillup.odometer_km)
-            if unit_prefs["distance"] == Profile.UNIT_MILES:
+            if unit_prefs["distance"] == "mi":
                 distance_value = km_to_miles(distance_value)
             fillup.display_odometer = int(round(distance_value))
 
             volume_value = float(fillup.liters)
-            if unit_prefs["volume"] == Profile.UNIT_GALLONS:
+            if unit_prefs["volume"] == "gal":
                 volume_value = liters_to_gallons(volume_value)
             fillup.display_volume = f"{volume_value:.2f}"
 
             fillup.display_total = f"{unit_prefs['currency']} {fillup.total_amount:.2f}"
+
+        def _fmt_distance_since_last(km_val):
+            if km_val is None:
+                return None
+            value = km_val
+            if unit_prefs["distance"] == "mi":
+                value = km_to_miles(value)
+            return str(int(round(value)))
+
+        def _fmt_unit_price(per_liter):
+            if per_liter is None:
+                return None
+            if unit_prefs["volume"] == "gal":
+                value = per_liter * LITERS_PER_GALLON
+                return f"{unit_prefs['currency']} {value:.2f} / gal"
+            return f"{unit_prefs['currency']} {per_liter:.2f} / L"
+
+        def _fmt_efficiency(l_per_100km, mpg):
+            if unit_prefs["distance"] == "mi" and unit_prefs["volume"] == "gal":
+                if mpg is None:
+                    return None
+                return f"{mpg:.1f} MPG"
+            if l_per_100km is None:
+                return None
+            return f"{l_per_100km:.1f} L/100km"
+
+        def _fmt_cost_per_distance(cost_per_km, cost_per_mile):
+            if unit_prefs["distance"] == "mi":
+                if cost_per_mile is None:
+                    return None
+                return f"{unit_prefs['currency']} {cost_per_mile:.2f} / mi"
+            if cost_per_km is None:
+                return None
+            return f"{unit_prefs['currency']} {cost_per_km:.2f} / km"
+
+        if fillup_by_id:
+            vehicle_ids = {fillup.vehicle_id for fillup in page_fillups}
+            if vehicle_ids:
+                all_vehicle_entries = (
+                    FillUp.objects.filter(vehicle__user=user, vehicle_id__in=vehicle_ids)
+                    .select_related("vehicle")
+                    .order_by("vehicle_id", "date", "id")
+                )
+
+                grouped: dict[int, list[FillUp]] = {}
+                for entry in all_vehicle_entries:
+                    grouped.setdefault(entry.vehicle_id, []).append(entry)
+
+                for vehicle_id, rows in grouped.items():
+                    for per_fill in per_fill_metrics(rows):
+                        fillup = fillup_by_id.get(per_fill.fillup.id)
+                        if not fillup:
+                            continue
+                        fillup._calc = SimpleNamespace(
+                            distance_since_last=_fmt_distance_since_last(per_fill.distance_since_last_km),
+                            unit_price=_fmt_unit_price(per_fill.unit_price_per_liter),
+                            efficiency=_fmt_efficiency(
+                                per_fill.efficiency_l_per_100km, per_fill.efficiency_mpg
+                            ),
+                            cost_per_distance=_fmt_cost_per_distance(
+                                per_fill.cost_per_km, per_fill.cost_per_mile
+                            ),
+                        )
+
+        if page_obj is not None:
+            page_obj.object_list = page_fillups
+        context["object_list"] = page_fillups
+        context[self.context_object_name] = page_fillups
+        context["unit_prefs"] = unit_prefs
 
         sort_links = {}
         for key in self.SORT_MAP:

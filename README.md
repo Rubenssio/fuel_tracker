@@ -81,6 +81,8 @@ Browse all fill-ups for the signed-in user at http://localhost:8000/history. Use
 - `/history?brand=Shell&grade=Premium`
 - `/history?station=Chevron&sort=total&dir=desc`
 
+The History page shows per-fill derived values (distance since last, unit price, efficiency, cost per distance). Stored values remain metric; display converts to user preferences with rounding.
+
 ## Metrics
 
 Review per-vehicle and aggregate performance at http://localhost:8000/metrics. The page supports filtering by vehicle and rolling window via query parameters, for example `/metrics?vehicle=all&window=30`.
