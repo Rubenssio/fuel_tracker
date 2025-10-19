@@ -3,6 +3,7 @@
     {% if request.user.is_authenticated %}
         <a href="/settings">Settings</a>
         <a href="/vehicles">Vehicles</a>
+        <a href="/fillups/add">Add Fill-Up</a>
         <a href="/auth/signout">Sign Out</a>
     {% else %}
         <a href="/auth/signin">Sign In</a>

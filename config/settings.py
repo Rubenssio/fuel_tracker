@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "core",
     "profiles.apps.ProfilesConfig",
     "vehicles.apps.VehiclesConfig",
+    "fillups.apps.FillupsConfig",
 ]
 
 MIDDLEWARE: list[str] = [

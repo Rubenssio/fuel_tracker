@@ -62,6 +62,17 @@ Authenticated users can manage their vehicles from simple server-rendered pages:
 - Add a new vehicle at http://localhost:8000/vehicles/add.
 - Edit or delete entries from the list view; deletes are CSRF-protected POST requests.
 
+## Fill-Ups
+
+Track refueling events for each vehicle with server-rendered forms at:
+
+- Add a fill-up at http://localhost:8000/fillups/add.
+- Edit or delete an existing fill-up via the vehicle list.
+
+Each fill-up stores the odometer reading (kilometers only), volume (liters), and total amount (stored in the currency you enter).
+Validation enforces that liters and total amount are greater than zero, odometer readings stay above zero, fill-up dates are not in the future,
+and odometer readings remain strictly increasing for each vehicle when sorted by date and creation order.
+
 ## Database quick checks (while app is running)
 
 Status and logs:
