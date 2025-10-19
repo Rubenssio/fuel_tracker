@@ -5,12 +5,13 @@ from django.db import connection
 from django.db.migrations.exceptions import MigrationSchemaMissing
 from django.db.migrations.executor import MigrationExecutor
 from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.shortcuts import render
 
 from core.models import BaselineSeed
 
 
-def success_view(request: HttpRequest) -> HttpResponse:
-    return HttpResponse("success", content_type="text/plain")
+def home_view(request: HttpRequest) -> HttpResponse:
+    return render(request, "core/home.html")
 
 
 def health_view(request: HttpRequest) -> JsonResponse:
