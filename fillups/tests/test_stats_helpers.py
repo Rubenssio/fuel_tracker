@@ -61,6 +61,7 @@ class StatisticsHelpersTests(TestCase):
         self.assertEqual(window_start_from_param("30", today), date(2024, 12, 16))
         self.assertEqual(window_start_from_param("90", today), date(2024, 10, 17))
         self.assertEqual(window_start_from_param("ytd", today), date(2025, 1, 1))
+        self.assertIsNone(window_start_from_param("all", today))
         self.assertEqual(window_start_from_param("unknown", today), date(2024, 12, 16))
 
     def test_timeseries_cost_per_liter(self) -> None:

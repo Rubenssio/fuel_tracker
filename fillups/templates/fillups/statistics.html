@@ -19,7 +19,15 @@
                 <select id="statistics-window" name="window">
                     {% for option in window_options %}
                         <option value="{{ option }}" {% if selected_window == option %}selected{% endif %}>
-                            {% if option == "30" %}Last 30 days{% elif option == "90" %}Last 90 days{% else %}Year to date{% endif %}
+                            {% if option == "30" %}
+                                Last 30 days
+                            {% elif option == "90" %}
+                                Last 90 days
+                            {% elif option == "ytd" %}
+                                Year to date
+                            {% else %}
+                                All-time
+                            {% endif %}
                         </option>
                     {% endfor %}
                 </select>
