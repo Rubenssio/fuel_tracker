@@ -7,8 +7,9 @@ from urllib.parse import urlencode
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseNotAllowed
-from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404, redirect, resolve_url
+from django.urls import NoReverseMatch
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.dateparse import parse_date
 from django.views import View
 from django.views.generic import CreateView, ListView, TemplateView, UpdateView
@@ -41,11 +42,61 @@ def _ensure_profile(user):
     return profile
 
 
-class FillUpCreateView(LoginRequiredMixin, CreateView):
+def _default_history_url() -> str:
+    try:
+        return resolve_url("history-list")
+    except NoReverseMatch:
+        return "/"
+
+
+def _safe_next(request, default: str | None = None) -> str:
+    if default is None:
+        default = _default_history_url()
+
+    nxt = request.POST.get("next") or request.GET.get("next")
+    if not nxt:
+        nxt = request.META.get("HTTP_REFERER")
+
+    if nxt and url_has_allowed_host_and_scheme(nxt, allowed_hosts={request.get_host()}):
+        return nxt
+
+    return default
+
+
+class FillUpFormContextMixin:
+    def _option_values(self, field_name: str) -> list[str]:
+        queryset = (
+            FillUp.objects.filter(vehicle__user=self.request.user)
+            .exclude(**{field_name: ""})
+            .order_by(field_name)
+            .values_list(field_name, flat=True)
+            .distinct()
+        )
+        return list(queryset)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            {
+                "brand_options": self._option_values("fuel_brand"),
+                "grade_options": self._option_values("fuel_grade"),
+                "station_options": self._option_values("station_name"),
+                "next_url": self.request.POST.get("next") or self.request.GET.get("next"),
+                "cancel_url": _safe_next(self.request),
+            }
+        )
+        return context
+
+
+class NextRedirectMixin:
+    def get_success_url(self):
+        return _safe_next(self.request)
+
+
+class FillUpCreateView(LoginRequiredMixin, FillUpFormContextMixin, NextRedirectMixin, CreateView):
     model = FillUp
     form_class = FillUpForm
     template_name = "fillups/form.html"
-    success_url = reverse_lazy("vehicle-list")
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -60,11 +111,10 @@ class FillUpCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class FillUpUpdateView(LoginRequiredMixin, UpdateView):
+class FillUpUpdateView(LoginRequiredMixin, FillUpFormContextMixin, NextRedirectMixin, UpdateView):
     model = FillUp
     form_class = FillUpForm
     template_name = "fillups/form.html"
-    success_url = reverse_lazy("vehicle-list")
 
     def get_queryset(self):
         return FillUp.objects.filter(vehicle__user=self.request.user)
@@ -83,12 +133,10 @@ class FillUpUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class FillUpDeleteView(LoginRequiredMixin, View):
-    success_url = reverse_lazy("vehicle-list")
-
     def post(self, request, pk):
         obj = get_object_or_404(FillUp, pk=pk, vehicle__user=request.user)
         obj.delete()
-        return redirect(self.success_url)
+        return redirect(_safe_next(request))
 
     def get(self, request, pk):
         return HttpResponseNotAllowed(["POST"])
