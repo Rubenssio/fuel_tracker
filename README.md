@@ -145,3 +145,13 @@ docker compose exec web python manage.py showmigrations accounts
 docker compose exec web python manage.py showmigrations profiles
 docker compose exec web python manage.py showmigrations vehicles
 ```
+
+## Step 10 verification
+
+Manual checks for the reliability and security hardening work completed in step 10:
+
+- With `DJANGO_DEBUG=0`, visit an unknown URL (for example `/missing-page`) and confirm the friendly 404 page appears without a traceback. Trigger an unhandled error (for example by temporarily raising an exception in a view) and confirm the 500 page renders without debug details.
+- Attempt to load or modify another user’s vehicle or fill-up by guessing object IDs (such as `/vehicles/1/edit` or `/fillups/1/edit`) and verify the response is `404` when signed in as a different user.
+- Open the fill-up creation form and confirm only your vehicles appear in the dropdown, and submissions for other users’ vehicles return a 404.
+- Inspect the response headers for `/` and `/vehicles` and confirm `X-Content-Type-Options` and `Referrer-Policy` are always present. When running with `DJANGO_DEBUG=0`, also confirm a `Content-Security-Policy: default-src 'self'` header is applied.
+- Check `/health` while `DJANGO_DEBUG=0` to confirm the JSON shape matches debug mode and that any `reason` strings remain short and do not reveal stack traces.

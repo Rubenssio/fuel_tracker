@@ -6,19 +6,21 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView
 
+from core.mixins import OwnedQuerysetMixin
+
 from .forms import VehicleForm
 from .models import Vehicle
 
 
-class VehicleListView(LoginRequiredMixin, ListView):
+class VehicleListView(LoginRequiredMixin, OwnedQuerysetMixin, ListView):
     model = Vehicle
     template_name = "vehicles/list.html"
 
     def get_queryset(self):
-        return Vehicle.objects.filter(user=self.request.user).order_by("name", "id")
+        return super().get_queryset().order_by("name", "id")
 
 
-class VehicleCreateView(LoginRequiredMixin, CreateView):
+class VehicleCreateView(LoginRequiredMixin, OwnedQuerysetMixin, CreateView):
     model = Vehicle
     form_class = VehicleForm
     template_name = "vehicles/form.html"
@@ -29,14 +31,14 @@ class VehicleCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class VehicleUpdateView(LoginRequiredMixin, UpdateView):
+class VehicleUpdateView(LoginRequiredMixin, OwnedQuerysetMixin, UpdateView):
     model = Vehicle
     form_class = VehicleForm
     template_name = "vehicles/form.html"
     success_url = reverse_lazy("vehicle-list")
 
     def get_queryset(self):
-        return Vehicle.objects.filter(user=self.request.user)
+        return super().get_queryset().filter(user=self.request.user)
 
 
 class VehicleDeleteView(LoginRequiredMixin, View):
