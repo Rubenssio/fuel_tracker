@@ -15,15 +15,15 @@
             </div>
             <div>
                 <label for="filter-brand">Brand</label>
-                <input type="text" id="filter-brand" name="brand" value="{{ active_filters.brand|default:'' }}">
+                <input type="text" id="filter-brand" name="brand" list="brand-options" value="{{ active_filters.brand|default:'' }}">
             </div>
             <div>
                 <label for="filter-grade">Grade</label>
-                <input type="text" id="filter-grade" name="grade" value="{{ active_filters.grade|default:'' }}">
+                <input type="text" id="filter-grade" name="grade" list="grade-options" value="{{ active_filters.grade|default:'' }}">
             </div>
             <div>
                 <label for="filter-station">Station</label>
-                <input type="text" id="filter-station" name="station" value="{{ active_filters.station|default:'' }}">
+                <input type="text" id="filter-station" name="station" list="station-options" value="{{ active_filters.station|default:'' }}">
             </div>
             <div>
                 <label for="filter-vehicle">Vehicle</label>
@@ -41,6 +41,21 @@
                 <a href="{% url 'history-list' %}">Clear</a>
             </div>
         </fieldset>
+        <datalist id="brand-options">
+            {% for value in brand_options %}
+                <option value="{{ value }}"></option>
+            {% endfor %}
+        </datalist>
+        <datalist id="grade-options">
+            {% for value in grade_options %}
+                <option value="{{ value }}"></option>
+            {% endfor %}
+        </datalist>
+        <datalist id="station-options">
+            {% for value in station_options %}
+                <option value="{{ value }}"></option>
+            {% endfor %}
+        </datalist>
     </form>
 </section>
 
@@ -141,7 +156,7 @@
         </div>
     {% else %}
         <p>No fill-ups found for your account.</p>
-        <p><a href="/fillups/add?next={{ request.get_full_path|urlencode }}">Add Fill-Up</a></p>
+        <p><a href="/fillups/add?next={{ request.path|urlencode }}">Add Fill-Up</a></p>
     {% endif %}
 </section>
 {% endblock %}
