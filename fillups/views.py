@@ -632,7 +632,7 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
 
             points: list[tuple[float, float]] = []
             if max_date == min_date:
-                x_positions = [self.CHART_WIDTH / 2.0] * len(cleaned)
+                x_positions = [self.CHART_WIDTH / 2.0] * len(cleaned_with_index)
             else:
                 total_days = (max_date - min_date).days
                 if total_days == 0:

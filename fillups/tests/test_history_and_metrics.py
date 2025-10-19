@@ -80,3 +80,50 @@ class HistoryAndMetricsViewTests(TestCase):
         self.assertEqual(metrics_response.status_code, 200)
         self.assertContains(metrics_response, "MPG")
         self.assertContains(metrics_response, "/ mi")
+
+
+class BaselineFillUpDisplayTests(TestCase):
+    def setUp(self) -> None:
+        self.user = get_user_model().objects.create_user(
+            username="baseline", email="baseline@example.com", password="password123"
+        )
+        self.client = Client()
+        assert self.client.login(username="baseline", password="password123")
+
+        self.vehicle = Vehicle.objects.create(user=self.user, name="Solo Car")
+
+        Profile.objects.create(
+            user=self.user,
+            currency="USD",
+            distance_unit=Profile.UNIT_KILOMETERS,
+            volume_unit=Profile.UNIT_LITERS,
+            timezone="UTC",
+            utc_offset_minutes=0,
+        )
+
+        FillUp.objects.create(
+            vehicle=self.vehicle,
+            date=date.today(),
+            odometer_km=1000,
+            station_name="Solo Station",
+            fuel_brand="Brand",
+            fuel_grade="Regular",
+            liters=Decimal("40.00"),
+            total_amount=Decimal("80.00"),
+        )
+
+    def test_history_displays_unit_price_for_baseline_fillup(self) -> None:
+        response = self.client.get(reverse("history-list"))
+        self.assertEqual(response.status_code, 200)
+
+        html = response.content.decode()
+        self.assertIn("USD 2.00 / L", html)
+        self.assertGreaterEqual(html.count("<td>—</td>"), 3)
+
+    def test_statistics_cost_series_includes_baseline(self) -> None:
+        response = self.client.get(reverse("statistics"))
+        self.assertEqual(response.status_code, 200)
+
+        chart_cost = response.context["chart_cost"]
+        self.assertTrue(chart_cost["has_data"])
+        self.assertGreaterEqual(len(chart_cost["points"]), 1)

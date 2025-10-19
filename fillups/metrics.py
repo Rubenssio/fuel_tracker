@@ -47,17 +47,17 @@ def per_fill_metrics(entries: List[FillUp]) -> list[PerFill]:
         cost_per_km: Decimal | None = None
         cost_per_mile: Decimal | None = None
 
+        liters = entry.liters
+        total_amount = entry.total_amount
+
+        if liters > 0:
+            unit_price = total_amount / liters
+
         if previous is not None:
             raw_distance = entry.odometer_km - previous.odometer_km
             if raw_distance > 0:
                 distance_decimal = Decimal(raw_distance)
                 distance_km = float(distance_decimal)
-
-                liters = entry.liters
-                total_amount = entry.total_amount
-
-                if liters > 0:
-                    unit_price = total_amount / liters
 
                 if liters > 0:
                     efficiency_l_per_100km = float((liters * Decimal(100)) / distance_decimal)
