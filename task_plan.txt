@@ -12,7 +12,7 @@ Legend: [ ] = todo, [v] = done
 [v] 09 — Legal & Account: Terms, Privacy, data export (CSV), account deletion
 [v] 10 — Reliability & Security: user-friendly errors, no stack traces; strict self-data isolation
 [v] 11 — Observability & Logging: correlation IDs and auth event logs
-[ ] 12 — Final pass: clean clone -> docker compose up -> everything reachable and meets performance notes
+[v] 12 — Final pass: clean clone -> docker compose up -> everything reachable and meets performance notes
 
 # UI polish track (run AFTER step 12)
 [ ] UI-01 — Base layout & style system: consistent spacing, typography scale, button/link states, alert/message components
