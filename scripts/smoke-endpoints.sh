@@ -11,8 +11,8 @@ ENDPOINTS=(
   /metrics
   /statistics
   /settings
-  /terms
-  /privacy
+  /legal/terms
+  /legal/privacy
   /health
 )
 
