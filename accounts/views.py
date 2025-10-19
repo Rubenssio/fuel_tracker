@@ -15,6 +15,8 @@ from django.utils import timezone
 from django.views import View
 from django.views.decorators.http import require_http_methods
 
+from audit.models import AuthEvent
+from core.logging import cv_correlation_id
 from .forms import EmailAuthenticationForm, SignupForm
 from fillups.models import FillUp
 
@@ -37,6 +39,14 @@ class SignupView(View):
         if form.is_valid():
             user = form.save()
             login(request, user)
+            AuthEvent.objects.create(
+                event_type=AuthEvent.EventType.SIGNUP,
+                user=user,
+                email=user.email or "",
+                ip_address=_get_client_ip(request),
+                user_agent=_get_user_agent(request),
+                correlation_id=_get_correlation_id(request),
+            )
             return redirect("/")
         return render(request, self.template_name, {"form": form})
 
@@ -54,6 +64,30 @@ class SigninView(LoginView):
 
 class SignoutView(LogoutView):
     next_page = "/"
+
+
+def _get_client_ip(request: HttpRequest) -> str | None:
+    forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
+    if forwarded:
+        for value in forwarded.split(","):
+            candidate = value.strip()
+            if candidate:
+                return candidate
+    return request.META.get("REMOTE_ADDR")
+
+
+def _get_user_agent(request: HttpRequest) -> str:
+    return request.META.get("HTTP_USER_AGENT", "")
+
+
+def _get_correlation_id(request: HttpRequest) -> str:
+    correlation_id = getattr(request, "correlation_id", None)
+    if correlation_id:
+        return str(correlation_id)
+    context_value = cv_correlation_id.get(None)
+    if context_value:
+        return str(context_value)
+    return ""
 
 
 def _format_decimal(value: Decimal | None, fmt: str) -> str:
