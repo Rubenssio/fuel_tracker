@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
@@ -8,6 +9,12 @@ from . import validators
 
 
 class FillUp(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="fillups",
+        editable=False,
+    )
     vehicle = models.ForeignKey(
         "vehicles.Vehicle",
         on_delete=models.CASCADE,
@@ -26,8 +33,30 @@ class FillUp(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=["vehicle", "-date"]),
-            models.Index(fields=["vehicle", "odometer_km"]),
+            models.Index(
+                fields=["user", "vehicle", "-date"],
+                name="ix_fill_user_veh_date",
+            ),
+            models.Index(
+                fields=["user", "-date"],
+                name="ix_fill_user_date",
+            ),
+            models.Index(
+                fields=["user", "fuel_brand"],
+                name="ix_fill_user_brand",
+            ),
+            models.Index(
+                fields=["user", "fuel_grade"],
+                name="ix_fill_user_grade",
+            ),
+            models.Index(
+                fields=["user", "station_name"],
+                name="ix_fill_user_station",
+            ),
+            models.Index(
+                fields=["vehicle", "odometer_km"],
+                name="ix_fill_vehicle_odo",
+            ),
         ]
         constraints = [
             models.CheckConstraint(
@@ -85,6 +114,9 @@ class FillUp(models.Model):
             raise ValidationError(errors)
 
     def save(self, *args, **kwargs):
+        if self.vehicle_id:
+            # Keep the user field aligned with the related vehicle owner.
+            self.user_id = self.vehicle.user_id
         self.full_clean()
         return super().save(*args, **kwargs)
 

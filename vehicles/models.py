@@ -17,6 +17,9 @@ class Vehicle(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        indexes = [
+            models.Index(fields=["user", "id"], name="ix_vehicle_user_id"),
+        ]
         constraints = [
             models.UniqueConstraint(
                 fields=["user", "name"],

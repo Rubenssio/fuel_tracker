@@ -102,7 +102,7 @@ def account_export_view(request: HttpRequest) -> HttpResponse:
 
     vehicles = user.vehicles.order_by("id")
     fillups = (
-        FillUp.objects.filter(vehicle__user=user)
+        FillUp.objects.filter(user=user)
         .select_related("vehicle")
         .order_by("vehicle_id", "date", "id")
     )
