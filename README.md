@@ -81,6 +81,17 @@ Browse all fill-ups for the signed-in user at http://localhost:8000/history. Use
 - `/history?brand=Shell&grade=Premium`
 - `/history?station=Chevron&sort=total&dir=desc`
 
+## Metrics
+
+Review per-vehicle and aggregate performance at http://localhost:8000/metrics. The page supports filtering by vehicle and rolling window via query parameters, for example `/metrics?vehicle=all&window=30`.
+
+All stored values remain metric; conversions happen at render time based on the profile preferences you set in `/settings`. Display rounding rules:
+
+- Currency totals, per-distance costs, and unit prices: 2 decimal places.
+- Volumes: 2 decimal places.
+- Efficiency: 1 decimal place (`L/100km` in metric or `MPG` in imperial).
+- Distances: whole numbers after conversion to the preferred unit.
+
 ## Database quick checks (while app is running)
 
 Status and logs:

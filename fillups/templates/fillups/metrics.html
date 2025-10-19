@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<section>
+    <h1>Metrics</h1>
+    <form method="get" class="filters">
+        <fieldset>
+            <legend>View options</legend>
+            <div>
+                <label for="metrics-vehicle">Vehicle</label>
+                <select id="metrics-vehicle" name="vehicle">
+                    <option value="all" {% if selected_vehicle == "all" %}selected{% endif %}>All vehicles</option>
+                    {% for vehicle in vehicles %}
+                        <option value="{{ vehicle.id }}" {% if selected_vehicle == vehicle.id|stringformat:"s" %}selected{% endif %}>{{ vehicle.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="metrics-window">Window</label>
+                <select id="metrics-window" name="window">
+                    <option value="30" {% if window == "30" %}selected{% endif %}>Last 30 days</option>
+                    <option value="90" {% if window == "90" %}selected{% endif %}>Last 90 days</option>
+                    <option value="ytd" {% if window == "ytd" %}selected{% endif %}>Year to date</option>
+                </select>
+            </div>
+            <div>
+                <button type="submit">Apply</button>
+            </div>
+        </fieldset>
+    </form>
+</section>
+
+<section>
+    <h2>Rolling ({{ window_label }})</h2>
+    <ul>
+        <li>Avg cost per {{ unit_prefs.volume }}: {% if rolling_metrics.avg_cost_per_volume %}{{ rolling_metrics.avg_cost_per_volume }}{% else %}—{% endif %}</li>
+        <li>Avg consumption: {% if rolling_metrics.avg_consumption %}{{ rolling_metrics.avg_consumption }}{% else %}—{% endif %}</li>
+        <li>Avg distance/day: {% if rolling_metrics.avg_distance_per_day %}{{ rolling_metrics.avg_distance_per_day }}{% else %}—{% endif %}</li>
+        <li>Avg cost/{{ unit_prefs.distance }}: {% if rolling_metrics.avg_cost_per_distance %}{{ rolling_metrics.avg_cost_per_distance }}{% else %}—{% endif %}</li>
+        <li>Total spend: {% if rolling_metrics.total_spend %}{{ rolling_metrics.total_spend }}{% else %}—{% endif %}</li>
+        <li>Total distance: {% if rolling_metrics.total_distance %}{{ rolling_metrics.total_distance }}{% else %}—{% endif %}</li>
+    </ul>
+</section>
+
+<section>
+    <h2>All-time</h2>
+    <ul>
+        <li>Avg cost per {{ unit_prefs.volume }}: {% if all_time_metrics.avg_cost_per_volume %}{{ all_time_metrics.avg_cost_per_volume }}{% else %}—{% endif %}</li>
+        <li>Avg consumption: {% if all_time_metrics.avg_consumption %}{{ all_time_metrics.avg_consumption }}{% else %}—{% endif %}</li>
+        <li>Avg distance/day: {% if all_time_metrics.avg_distance_per_day %}{{ all_time_metrics.avg_distance_per_day }}{% else %}—{% endif %}</li>
+        <li>Avg cost/{{ unit_prefs.distance }}: {% if all_time_metrics.avg_cost_per_distance %}{{ all_time_metrics.avg_cost_per_distance }}{% else %}—{% endif %}</li>
+        <li>Total spend: {% if all_time_metrics.total_spend %}{{ all_time_metrics.total_spend }}{% else %}—{% endif %}</li>
+        <li>Total distance: {% if all_time_metrics.total_distance %}{{ all_time_metrics.total_distance }}{% else %}—{% endif %}</li>
+    </ul>
+</section>
+{% endblock %}

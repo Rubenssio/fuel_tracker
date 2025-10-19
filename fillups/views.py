@@ -1,20 +1,25 @@
 from __future__ import annotations
 
+from collections import defaultdict
+from datetime import date, timedelta
+from types import SimpleNamespace
 from urllib.parse import urlencode
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 from django.http import HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils.dateparse import parse_date
 from django.views import View
-from django.views.generic import CreateView, ListView, UpdateView
+from django.views.generic import CreateView, ListView, TemplateView, UpdateView
 
 from profiles.models import Profile
 from profiles.units import km_to_miles, liters_to_gallons
 
 from .forms import FillUpForm
 from .models import FillUp
+from .metrics import aggregate_metrics, per_fill_metrics, round_for_display
 
 
 class FillUpCreateView(LoginRequiredMixin, CreateView):
@@ -168,13 +173,63 @@ class HistoryListView(LoginRequiredMixin, ListView):
 
         user = self.request.user
         profile = getattr(user, "profile", None)
+        prefs = profile or SimpleNamespace(
+            distance_unit=Profile.UNIT_KILOMETERS,
+            volume_unit=Profile.UNIT_LITERS,
+            currency="USD",
+        )
         unit_prefs = {
-            "distance": profile.distance_unit if profile else Profile.UNIT_KILOMETERS,
-            "volume": profile.volume_unit if profile else Profile.UNIT_LITERS,
-            "currency": profile.currency if profile else "USD",
+            "distance": prefs.distance_unit,
+            "volume": prefs.volume_unit,
+            "currency": prefs.currency,
         }
 
         fillups = context.get("fillups", [])
+
+        for fillup in fillups:
+            fillup._calc = round_for_display({}, prefs)
+
+        vehicle_groups: dict[int, list] = defaultdict(list)
+        for fillup in fillups:
+            vehicle_groups[fillup.vehicle_id].append(fillup)
+
+        for vehicle_id, vehicle_fillups in vehicle_groups.items():
+            sorted_fillups = sorted(vehicle_fillups, key=lambda entry: (entry.date, entry.id))
+            baseline_entry = sorted_fillups[0]
+
+            previous_entry = (
+                FillUp.objects.filter(vehicle_id=vehicle_id, vehicle__user=user)
+                .filter(
+                    Q(date__lt=baseline_entry.date)
+                    | Q(date=baseline_entry.date, id__lt=baseline_entry.id)
+                )
+                .order_by("-date", "-id")
+                .first()
+            )
+
+            entries_for_metrics = []
+            if previous_entry is not None:
+                entries_for_metrics.append(previous_entry)
+            entries_for_metrics.extend(sorted_fillups)
+
+            metrics = per_fill_metrics(entries_for_metrics)
+            metrics_by_id = {item.fillup.id: item for item in metrics if item.fillup in vehicle_fillups}
+
+            for fillup in vehicle_fillups:
+                per_fill = metrics_by_id.get(fillup.id)
+                if per_fill:
+                    fillup._calc = round_for_display(
+                        {
+                            "distance_since_last_km": per_fill.distance_since_last_km,
+                            "unit_price_per_liter": per_fill.unit_price_per_liter,
+                            "efficiency_l_per_100km": per_fill.efficiency_l_per_100km,
+                            "efficiency_mpg": per_fill.efficiency_mpg,
+                            "cost_per_km": per_fill.cost_per_km,
+                            "cost_per_mile": per_fill.cost_per_mile,
+                        },
+                        prefs,
+                    )
+
         for fillup in fillups:
             distance_value = float(fillup.odometer_km)
             if unit_prefs["distance"] == Profile.UNIT_MILES:
@@ -207,6 +262,87 @@ class HistoryListView(LoginRequiredMixin, ListView):
                 "unit_prefs": unit_prefs,
                 "sort_links": sort_links,
                 "base_querystring": base_querystring,
+            }
+        )
+
+        return context
+
+
+class MetricsView(LoginRequiredMixin, TemplateView):
+    template_name = "fillups/metrics.html"
+
+    WINDOW_DEFAULT = "30"
+    WINDOW_CHOICES = {"30", "90", "ytd"}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        request = self.request
+        user = request.user
+        profile = getattr(user, "profile", None)
+        prefs = profile or SimpleNamespace(
+            distance_unit=Profile.UNIT_KILOMETERS,
+            volume_unit=Profile.UNIT_LITERS,
+            currency="USD",
+        )
+
+        window_param = request.GET.get("window", self.WINDOW_DEFAULT).lower()
+        if window_param not in self.WINDOW_CHOICES:
+            window_param = self.WINDOW_DEFAULT
+
+        today = date.today()
+        if window_param == "90":
+            window_start = today - timedelta(days=90)
+            window_label = "Last 90 days"
+        elif window_param == "ytd":
+            window_start = date(today.year, 1, 1)
+            window_label = "Year to date"
+        else:
+            window_start = today - timedelta(days=30)
+            window_label = "Last 30 days"
+
+        vehicle_param = request.GET.get("vehicle", "all").strip() or "all"
+        selected_vehicle_id: int | None = None
+        if vehicle_param != "all":
+            try:
+                candidate_id = int(vehicle_param)
+            except (TypeError, ValueError):
+                vehicle_param = "all"
+            else:
+                if user.vehicles.filter(id=candidate_id).exists():
+                    selected_vehicle_id = candidate_id
+                else:
+                    vehicle_param = "all"
+
+        queryset = (
+            FillUp.objects.filter(vehicle__user=user)
+            .select_related("vehicle")
+            .order_by("vehicle_id", "date", "id")
+        )
+        if selected_vehicle_id is not None:
+            queryset = queryset.filter(vehicle_id=selected_vehicle_id)
+
+        entries = list(queryset)
+
+        rolling_raw = aggregate_metrics(entries, window_start=window_start)
+        all_time_raw = aggregate_metrics(entries)
+
+        rolling_display = round_for_display(rolling_raw, prefs)
+        all_time_display = round_for_display(all_time_raw, prefs)
+
+        context.update(
+            {
+                "vehicles": user.vehicles.all(),
+                "selected_vehicle": vehicle_param,
+                "window": window_param,
+                "window_label": window_label,
+                "rolling_metrics": rolling_display,
+                "all_time_metrics": all_time_display,
+                "unit_prefs": {
+                    "distance": prefs.distance_unit,
+                    "volume": prefs.volume_unit,
+                    "currency": prefs.currency,
+                },
             }
         )
 
