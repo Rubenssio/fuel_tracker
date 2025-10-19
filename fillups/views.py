@@ -7,9 +7,7 @@ from urllib.parse import urlencode
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404, HttpResponseNotAllowed
-from django.shortcuts import get_object_or_404, redirect, resolve_url
-from django.urls import NoReverseMatch
-from django.utils.http import url_has_allowed_host_and_scheme
+from django.shortcuts import get_object_or_404, redirect
 from django.utils.dateparse import parse_date
 from django.views import View
 from django.views.generic import CreateView, ListView, TemplateView, UpdateView
@@ -17,6 +15,7 @@ from django.views.generic import CreateView, ListView, TemplateView, UpdateView
 from profiles.models import Profile
 from profiles.units import gallons_to_liters, km_to_miles, liters_to_gallons
 from core.mixins import OwnedQuerysetMixin
+from core.utils import sanitize_next
 
 from .forms import FillUpForm
 from .models import FillUp
@@ -43,39 +42,6 @@ def _ensure_profile(user):
     return profile
 
 
-def _default_history_url() -> str:
-    try:
-        return resolve_url("history-list")
-    except NoReverseMatch:
-        return "/"
-
-
-def _derive_next_url(request, default: str | None = None) -> str:
-    if default is None:
-        default = _default_history_url()
-
-    candidate = request.GET.get("next") or request.META.get("HTTP_REFERER") or default
-
-    if candidate and url_has_allowed_host_and_scheme(candidate, allowed_hosts={request.get_host()}):
-        return candidate
-
-    return default
-
-
-def _safe_next(request, default: str | None = None) -> str:
-    if default is None:
-        default = _default_history_url()
-
-    nxt = request.POST.get("next") or request.GET.get("next")
-    if not nxt:
-        nxt = request.META.get("HTTP_REFERER")
-
-    if nxt and url_has_allowed_host_and_scheme(nxt, allowed_hosts={request.get_host()}):
-        return nxt
-
-    return default
-
-
 class FillUpFormContextMixin:
     def _option_values(self, field_name: str) -> list[str]:
         queryset = (
@@ -89,31 +55,17 @@ class FillUpFormContextMixin:
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.method == "POST":
-            next_url = _safe_next(self.request)
-        else:
-            next_url = _derive_next_url(self.request)
-
         context.update(
             {
                 "brand_options": self._option_values("fuel_brand"),
                 "grade_options": self._option_values("fuel_grade"),
                 "station_options": self._option_values("station_name"),
-                "next_url": next_url,
-                "cancel_url": _safe_next(self.request),
             }
         )
         return context
 
 
-class NextRedirectMixin:
-    def get_success_url(self):
-        return _safe_next(self.request)
-
-
-class FillUpCreateView(
-    LoginRequiredMixin, OwnedQuerysetMixin, FillUpFormContextMixin, NextRedirectMixin, CreateView
-):
+class FillUpCreateView(LoginRequiredMixin, OwnedQuerysetMixin, FillUpFormContextMixin, CreateView):
     model = FillUp
     form_class = FillUpForm
     template_name = "fillups/form.html"
@@ -123,16 +75,23 @@ class FillUpCreateView(
         kwargs["user"] = self.request.user
         return kwargs
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        next_raw = self.request.GET.get("next") or self.request.POST.get("next")
+        next_url = sanitize_next(next_raw, default="/vehicles")
+        context["next_url"] = next_url
+        context["cancel_url"] = next_url
+        return context
+
     def form_valid(self, form):
         vehicle = form.cleaned_data.get("vehicle") or getattr(form.instance, "vehicle", None)
         if vehicle is None or vehicle.user != self.request.user:
             raise Http404()
-        return super().form_valid(form)
+        self.object = form.save()
+        return redirect(sanitize_next(self.request.POST.get("next"), default="/vehicles"))
 
 
-class FillUpUpdateView(
-    LoginRequiredMixin, OwnedQuerysetMixin, FillUpFormContextMixin, NextRedirectMixin, UpdateView
-):
+class FillUpUpdateView(LoginRequiredMixin, OwnedQuerysetMixin, FillUpFormContextMixin, UpdateView):
     model = FillUp
     form_class = FillUpForm
     template_name = "fillups/form.html"
@@ -145,18 +104,27 @@ class FillUpUpdateView(
         kwargs["user"] = self.request.user
         return kwargs
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        next_raw = self.request.GET.get("next") or self.request.POST.get("next")
+        next_url = sanitize_next(next_raw, default="/vehicles")
+        context["next_url"] = next_url
+        context["cancel_url"] = next_url
+        return context
+
     def form_valid(self, form):
         vehicle = form.cleaned_data.get("vehicle") or getattr(form.instance, "vehicle", None)
         if vehicle is None or vehicle.user != self.request.user:
             raise Http404()
-        return super().form_valid(form)
+        self.object = form.save()
+        return redirect(sanitize_next(self.request.POST.get("next"), default="/vehicles"))
 
 
 class FillUpDeleteView(LoginRequiredMixin, View):
     def post(self, request, pk):
         obj = get_object_or_404(FillUp, pk=pk, vehicle__user=request.user)
         obj.delete()
-        return redirect(_safe_next(request))
+        return redirect(sanitize_next(request.POST.get("next"), default="/history"))
 
     def get(self, request, pk):
         return HttpResponseNotAllowed(["POST"])
@@ -387,6 +355,28 @@ class HistoryListView(LoginRequiredMixin, OwnedQuerysetMixin, ListView):
 
         base_querystring = self._build_querystring()
 
+        brand_options = (
+            FillUp.objects.filter(vehicle__user=user)
+            .exclude(fuel_brand="")
+            .values_list("fuel_brand", flat=True)
+            .distinct()
+            .order_by("fuel_brand")
+        )
+        grade_options = (
+            FillUp.objects.filter(vehicle__user=user)
+            .exclude(fuel_grade="")
+            .values_list("fuel_grade", flat=True)
+            .distinct()
+            .order_by("fuel_grade")
+        )
+        station_options = (
+            FillUp.objects.filter(vehicle__user=user)
+            .exclude(station_name="")
+            .values_list("station_name", flat=True)
+            .distinct()
+            .order_by("station_name")
+        )
+
         context.update(
             {
                 "active_filters": self.active_filters,
@@ -397,6 +387,9 @@ class HistoryListView(LoginRequiredMixin, OwnedQuerysetMixin, ListView):
                 "sort_links": sort_links,
                 "base_querystring": base_querystring,
                 "efficiency_label": efficiency_label,
+                "brand_options": list(brand_options),
+                "grade_options": list(grade_options),
+                "station_options": list(station_options),
             }
         )
 
