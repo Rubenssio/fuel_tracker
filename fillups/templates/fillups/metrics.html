@@ -32,24 +32,24 @@
 <section>
     <h2>Rolling ({{ window_label }})</h2>
     <ul>
-        <li>Avg cost per {{ unit_prefs.volume }}: {% if rolling_metrics.avg_cost_per_volume %}{{ rolling_metrics.avg_cost_per_volume }}{% else %}—{% endif %}</li>
-        <li>Avg consumption: {% if rolling_metrics.avg_consumption %}{{ rolling_metrics.avg_consumption }}{% else %}—{% endif %}</li>
-        <li>Avg distance/day: {% if rolling_metrics.avg_distance_per_day %}{{ rolling_metrics.avg_distance_per_day }}{% else %}—{% endif %}</li>
-        <li>Avg cost/{{ unit_prefs.distance }}: {% if rolling_metrics.avg_cost_per_distance %}{{ rolling_metrics.avg_cost_per_distance }}{% else %}—{% endif %}</li>
-        <li>Total spend: {% if rolling_metrics.total_spend %}{{ rolling_metrics.total_spend }}{% else %}—{% endif %}</li>
-        <li>Total distance: {% if rolling_metrics.total_distance %}{{ rolling_metrics.total_distance }}{% else %}—{% endif %}</li>
+        <li>Avg cost per {{ unit_prefs.volume }}: {{ rolling_metrics.avg_cost_per_volume|default:"—" }}</li>
+        <li>Avg consumption: {{ rolling_metrics.avg_consumption|default:"—" }}</li>
+        <li>Avg distance/day: {{ rolling_metrics.avg_distance_per_day|default:"—" }}</li>
+        <li>Avg cost/{{ unit_prefs.distance }}: {{ rolling_metrics.avg_cost_per_distance|default:"—" }}</li>
+        <li>Total spend: {{ rolling_metrics.total_spend|default:"—" }}</li>
+        <li>Total distance: {{ rolling_metrics.total_distance|default:"—" }}</li>
     </ul>
 </section>
 
 <section>
     <h2>All-time</h2>
     <ul>
-        <li>Avg cost per {{ unit_prefs.volume }}: {% if all_time_metrics.avg_cost_per_volume %}{{ all_time_metrics.avg_cost_per_volume }}{% else %}—{% endif %}</li>
-        <li>Avg consumption: {% if all_time_metrics.avg_consumption %}{{ all_time_metrics.avg_consumption }}{% else %}—{% endif %}</li>
-        <li>Avg distance/day: {% if all_time_metrics.avg_distance_per_day %}{{ all_time_metrics.avg_distance_per_day }}{% else %}—{% endif %}</li>
-        <li>Avg cost/{{ unit_prefs.distance }}: {% if all_time_metrics.avg_cost_per_distance %}{{ all_time_metrics.avg_cost_per_distance }}{% else %}—{% endif %}</li>
-        <li>Total spend: {% if all_time_metrics.total_spend %}{{ all_time_metrics.total_spend }}{% else %}—{% endif %}</li>
-        <li>Total distance: {% if all_time_metrics.total_distance %}{{ all_time_metrics.total_distance }}{% else %}—{% endif %}</li>
+        <li>Avg cost per {{ unit_prefs.volume }}: {{ all_time_metrics.avg_cost_per_volume|default:"—" }}</li>
+        <li>Avg consumption: {{ all_time_metrics.avg_consumption|default:"—" }}</li>
+        <li>Avg distance/day: {{ all_time_metrics.avg_distance_per_day|default:"—" }}</li>
+        <li>Avg cost/{{ unit_prefs.distance }}: {{ all_time_metrics.avg_cost_per_distance|default:"—" }}</li>
+        <li>Total spend: {{ all_time_metrics.total_spend|default:"—" }}</li>
+        <li>Total distance: {{ all_time_metrics.total_distance|default:"—" }}</li>
     </ul>
 </section>
 {% endblock %}
