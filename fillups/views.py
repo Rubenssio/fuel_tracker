@@ -201,7 +201,7 @@ class HistoryListView(LoginRequiredMixin, ListView):
         liters_per_gallon = Decimal(str(gallons_to_liters(1.0)))
 
         for fillup in page_fillups:
-            fillup._calc = SimpleNamespace(
+            fillup.calc = SimpleNamespace(
                 distance_since_last=None,
                 unit_price=None,
                 efficiency=None,
@@ -276,7 +276,7 @@ class HistoryListView(LoginRequiredMixin, ListView):
                         fillup = fillup_by_id.get(per_fill.fillup.id)
                         if not fillup:
                             continue
-                        fillup._calc = SimpleNamespace(
+                        fillup.calc = SimpleNamespace(
                             distance_since_last=_fmt_distance_since_last(per_fill.distance_since_last_km),
                             unit_price=_fmt_unit_price(per_fill.unit_price_per_liter),
                             efficiency=_fmt_efficiency(
