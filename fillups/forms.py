@@ -82,19 +82,30 @@ class FillUpForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
-        profile = self.profile
-        if not cleaned_data or profile is None:
+        if not cleaned_data:
             return cleaned_data
 
-        odometer_value = cleaned_data.get("odometer_km")
-        if odometer_value is not None and profile.distance_unit == Profile.UNIT_MILES:
-            converted = miles_to_km(float(odometer_value))
-            cleaned_data["odometer_km"] = int(round(converted))
+        profile = self.profile
+        if profile is not None:
+            odometer_value = cleaned_data.get("odometer_km")
+            if odometer_value is not None and profile.distance_unit == Profile.UNIT_MILES:
+                converted = miles_to_km(float(odometer_value))
+                cleaned_data["odometer_km"] = int(round(converted))
 
-        liters_value = cleaned_data.get("liters")
-        if liters_value is not None and profile.volume_unit == Profile.UNIT_GALLONS:
-            liters_float = gallons_to_liters(float(liters_value))
-            converted_decimal = Decimal(str(liters_float)).quantize(Decimal("0.01"))
-            cleaned_data["liters"] = converted_decimal
+            liters_value = cleaned_data.get("liters")
+            if liters_value is not None and profile.volume_unit == Profile.UNIT_GALLONS:
+                liters_float = gallons_to_liters(float(liters_value))
+                converted_decimal = Decimal(str(liters_float)).quantize(Decimal("0.01"))
+                cleaned_data["liters"] = converted_decimal
+
+        def _normalize(value: str | None) -> str:
+            value = (value or "").strip()
+            if not value:
+                return ""
+            return " ".join(value.split())
+
+        cleaned_data["fuel_brand"] = _normalize(cleaned_data.get("fuel_brand"))
+        cleaned_data["fuel_grade"] = _normalize(cleaned_data.get("fuel_grade"))
+        cleaned_data["station_name"] = _normalize(cleaned_data.get("station_name"))
 
         return cleaned_data

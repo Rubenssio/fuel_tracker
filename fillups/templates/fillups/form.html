@@ -4,8 +4,44 @@
     <h1>{% if object %}Edit Fill-Up{% else %}Add Fill-Up{% endif %}</h1>
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        <input type="hidden" name="next" value="{{ request.GET.next|default:request.POST.next|default:next_url }}">
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            <p>
+                {{ field.label_tag }}
+                {% if field.name == "fuel_brand" %}
+                    {{ field.as_widget(attrs={"list": "brand-options"}) }}
+                    <datalist id="brand-options">
+                        {% for value in brand_options %}
+                            <option value="{{ value }}"></option>
+                        {% endfor %}
+                    </datalist>
+                {% elif field.name == "fuel_grade" %}
+                    {{ field.as_widget(attrs={"list": "grade-options"}) }}
+                    <datalist id="grade-options">
+                        {% for value in grade_options %}
+                            <option value="{{ value }}"></option>
+                        {% endfor %}
+                    </datalist>
+                {% elif field.name == "station_name" %}
+                    {{ field.as_widget(attrs={"list": "station-options"}) }}
+                    <datalist id="station-options">
+                        {% for value in station_options %}
+                            <option value="{{ value }}"></option>
+                        {% endfor %}
+                    </datalist>
+                {% else %}
+                    {{ field }}
+                {% endif %}
+                {% if field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            </p>
+        {% endfor %}
         <button type="submit">Save</button>
-        <a href="/vehicles">Cancel</a>
+        <a href="{{ cancel_url }}">Cancel</a>
     </form>
 {% endblock %}

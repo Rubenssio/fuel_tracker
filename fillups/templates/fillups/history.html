@@ -109,9 +109,10 @@
                         <td>{{ fillup.calc.efficiency|default:"—" }}</td>
                         <td>{{ fillup.calc.cost_per_distance|default:"—" }}</td>
                         <td>
-                            <a href="/fillups/{{ fillup.id }}/edit">Edit</a>
+                            <a href="/fillups/{{ fillup.id }}/edit?next={{ request.get_full_path|urlencode }}">Edit</a>
                             <form method="post" action="/fillups/{{ fillup.id }}/delete" style="display:inline">
                                 {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path|urlencode }}">
                                 <button type="submit">Delete</button>
                             </form>
                         </td>
@@ -140,7 +141,7 @@
         </div>
     {% else %}
         <p>No fill-ups found for your account.</p>
-        <p><a href="/fillups/add">Add Fill-Up</a></p>
+        <p><a href="/fillups/add?next={{ request.get_full_path|urlencode }}">Add Fill-Up</a></p>
     {% endif %}
 </section>
 {% endblock %}
