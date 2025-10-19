@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from datetime import date, timedelta
+from decimal import Decimal
 from types import SimpleNamespace
 from urllib.parse import urlencode
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q
 from django.http import HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -14,7 +14,7 @@ from django.views import View
 from django.views.generic import CreateView, ListView, TemplateView, UpdateView
 
 from profiles.models import Profile
-from profiles.units import LITERS_PER_GALLON, km_to_miles, liters_to_gallons
+from profiles.units import gallons_to_liters, km_to_miles, liters_to_gallons
 
 from .forms import FillUpForm
 from .models import FillUp
@@ -198,6 +198,8 @@ class HistoryListView(LoginRequiredMixin, ListView):
 
         fillup_by_id = {fillup.id: fillup for fillup in page_fillups}
 
+        liters_per_gallon = Decimal(str(gallons_to_liters(1.0)))
+
         for fillup in page_fillups:
             fillup._calc = SimpleNamespace(
                 distance_since_last=None,
@@ -218,7 +220,7 @@ class HistoryListView(LoginRequiredMixin, ListView):
 
             fillup.display_total = f"{unit_prefs['currency']} {fillup.total_amount:.2f}"
 
-        def _fmt_distance_since_last(km_val):
+        def _fmt_distance_since_last(km_val: float | None):
             if km_val is None:
                 return None
             value = km_val
@@ -226,15 +228,17 @@ class HistoryListView(LoginRequiredMixin, ListView):
                 value = km_to_miles(value)
             return str(int(round(value)))
 
-        def _fmt_unit_price(per_liter):
+        def _fmt_unit_price(per_liter: Decimal | None):
             if per_liter is None:
                 return None
+            value = per_liter
+            unit_label = "L"
             if unit_prefs["volume"] == "gal":
-                value = per_liter * LITERS_PER_GALLON
-                return f"{unit_prefs['currency']} {value:.2f} / gal"
-            return f"{unit_prefs['currency']} {per_liter:.2f} / L"
+                value = per_liter * liters_per_gallon
+                unit_label = "gal"
+            return f"{unit_prefs['currency']} {value:.2f} / {unit_label}"
 
-        def _fmt_efficiency(l_per_100km, mpg):
+        def _fmt_efficiency(l_per_100km: float | None, mpg: float | None):
             if unit_prefs["distance"] == "mi" and unit_prefs["volume"] == "gal":
                 if mpg is None:
                     return None
@@ -243,14 +247,16 @@ class HistoryListView(LoginRequiredMixin, ListView):
                 return None
             return f"{l_per_100km:.1f} L/100km"
 
-        def _fmt_cost_per_distance(cost_per_km, cost_per_mile):
+        def _fmt_cost_per_distance(cost_per_km: Decimal | None, cost_per_mile: Decimal | None):
+            currency = unit_prefs["currency"]
             if unit_prefs["distance"] == "mi":
                 if cost_per_mile is None:
                     return None
-                return f"{unit_prefs['currency']} {cost_per_mile:.2f} / mi"
+                value = cost_per_mile
+                return f"{currency} {value:.2f} / mi"
             if cost_per_km is None:
                 return None
-            return f"{unit_prefs['currency']} {cost_per_km:.2f} / km"
+            return f"{currency} {cost_per_km:.2f} / km"
 
         if fillup_by_id:
             vehicle_ids = {fillup.vehicle_id for fillup in page_fillups}
@@ -323,12 +329,8 @@ class MetricsView(LoginRequiredMixin, TemplateView):
 
         request = self.request
         user = request.user
-        profile = getattr(user, "profile", None)
-        prefs = profile or SimpleNamespace(
-            distance_unit=Profile.UNIT_KILOMETERS,
-            volume_unit=Profile.UNIT_LITERS,
-            currency="USD",
-        )
+        profile = _ensure_profile(user)
+        prefs = profile
 
         window_param = request.GET.get("window", self.WINDOW_DEFAULT).lower()
         if window_param not in self.WINDOW_CHOICES:
@@ -371,8 +373,68 @@ class MetricsView(LoginRequiredMixin, TemplateView):
         rolling_raw = aggregate_metrics(entries, window_start=window_start)
         all_time_raw = aggregate_metrics(entries)
 
-        rolling_display = round_for_display(rolling_raw, prefs)
-        all_time_display = round_for_display(all_time_raw, prefs)
+        unit_prefs = {
+            "distance": "mi" if prefs.distance_unit == Profile.UNIT_MILES else "km",
+            "volume": "gal" if prefs.volume_unit == Profile.UNIT_GALLONS else "L",
+            "currency": prefs.currency or "USD",
+        }
+
+        liters_per_gallon = Decimal(str(gallons_to_liters(1.0)))
+
+        def _format_metrics(raw: dict) -> dict[str, str | None]:
+            result: dict[str, str | None] = {
+                "avg_cost_per_volume": None,
+                "avg_consumption": None,
+                "avg_distance_per_day": None,
+                "avg_cost_per_distance": None,
+                "total_spend": f"{unit_prefs['currency']} {raw['total_spend']:.2f}",
+                "total_distance": f"0 {unit_prefs['distance']}",
+            }
+
+            avg_cost_per_liter = raw.get("avg_cost_per_liter")
+            if avg_cost_per_liter is not None:
+                value = avg_cost_per_liter
+                unit_label = "L"
+                if unit_prefs["volume"] == "gal":
+                    value = avg_cost_per_liter * liters_per_gallon
+                    unit_label = "gal"
+                result["avg_cost_per_volume"] = f"{unit_prefs['currency']} {value:.2f} / {unit_label}"
+
+            if unit_prefs["distance"] == "mi" and unit_prefs["volume"] == "gal":
+                mpg = raw.get("avg_consumption_mpg")
+                if mpg is not None:
+                    result["avg_consumption"] = f"{mpg:.1f} MPG"
+            else:
+                l_per_100 = raw.get("avg_consumption_l_per_100km")
+                if l_per_100 is not None:
+                    result["avg_consumption"] = f"{l_per_100:.1f} L/100km"
+
+            avg_distance_per_day = raw.get("avg_distance_per_day_km")
+            if avg_distance_per_day is not None:
+                value = avg_distance_per_day
+                if unit_prefs["distance"] == "mi":
+                    value = km_to_miles(value)
+                result["avg_distance_per_day"] = f"{int(round(value))} {unit_prefs['distance']}/day"
+
+            if unit_prefs["distance"] == "mi":
+                cost_per_mile = raw.get("avg_cost_per_mile")
+                if cost_per_mile is not None:
+                    result["avg_cost_per_distance"] = f"{unit_prefs['currency']} {cost_per_mile:.2f} / mi"
+            else:
+                cost_per_km = raw.get("avg_cost_per_km")
+                if cost_per_km is not None:
+                    result["avg_cost_per_distance"] = f"{unit_prefs['currency']} {cost_per_km:.2f} / km"
+
+            total_distance_km = raw.get("total_distance_km", 0.0) or 0.0
+            distance_value = total_distance_km
+            if unit_prefs["distance"] == "mi":
+                distance_value = km_to_miles(distance_value)
+            result["total_distance"] = f"{int(round(distance_value))} {unit_prefs['distance']}"
+
+            return result
+
+        rolling_display = _format_metrics(rolling_raw)
+        all_time_display = _format_metrics(all_time_raw)
 
         context.update(
             {
@@ -382,11 +444,7 @@ class MetricsView(LoginRequiredMixin, TemplateView):
                 "window_label": window_label,
                 "rolling_metrics": rolling_display,
                 "all_time_metrics": all_time_display,
-                "unit_prefs": {
-                    "distance": prefs.distance_unit,
-                    "volume": prefs.volume_unit,
-                    "currency": prefs.currency,
-                },
+                "unit_prefs": unit_prefs,
             }
         )
 

@@ -82,12 +82,15 @@ Browse all fill-ups for the signed-in user at http://localhost:8000/history. Use
 - `/history?station=Chevron&sort=total&dir=desc`
 
 The History page shows per-fill derived values (distance since last, unit price, efficiency, cost per distance). Stored values remain metric; display converts to user preferences with rounding.
+All derived values are computed at view time from canonical metric storage; units and rounding are display-only.
 
 ## Metrics
 
 Review per-vehicle and aggregate performance at http://localhost:8000/metrics. The page supports filtering by vehicle and rolling window via query parameters, for example `/metrics?vehicle=all&window=30`.
 
 All stored values remain metric; conversions happen at render time based on the profile preferences you set in `/settings`. Display rounding rules:
+
+All derived values are computed at view time from canonical metric storage; units and rounding are display-only.
 
 - Currency totals, per-distance costs, and unit prices: 2 decimal places.
 - Volumes: 2 decimal places.
