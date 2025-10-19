@@ -56,6 +56,18 @@
         {% endif %}
     </div>
     <div>
+        <label for="id_efficiency_unit">Efficiency unit:</label>
+        {{ form.efficiency_unit }}
+        {% if form.efficiency_unit.errors %}
+            <ul>
+                {% for error in form.efficiency_unit.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <p><small>Efficiency display is independent of distance/volume preferences.</small></p>
+    </div>
+    <div>
         <label for="id_utc_offset_minutes">Timezone offset:</label>
         {{ form.utc_offset_minutes }}
         {% if form.utc_offset_minutes.errors %}

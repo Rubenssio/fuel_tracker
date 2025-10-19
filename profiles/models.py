@@ -23,6 +23,10 @@ class Profile(models.Model):
         (UNIT_GALLONS, "Gallons"),
     ]
 
+    class EfficiencyUnit(models.TextChoices):
+        L_PER_100KM = "l_per_100km", "L/100km"
+        MPG = "mpg", "MPG"
+
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -39,6 +43,11 @@ class Profile(models.Model):
         max_length=3,
         choices=VOLUME_UNIT_CHOICES,
         default=UNIT_LITERS,
+    )
+    efficiency_unit = models.CharField(
+        max_length=16,
+        choices=EfficiencyUnit.choices,
+        default=EfficiencyUnit.L_PER_100KM,
     )
     timezone = models.CharField(max_length=255, default="UTC")
     utc_offset_minutes = models.IntegerField(default=0)

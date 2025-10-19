@@ -33,7 +33,7 @@
     <h2>Rolling ({{ window_label }})</h2>
     <ul>
         <li>Avg cost per {{ unit_prefs.volume }}: {{ rolling_metrics.avg_cost_per_volume|default:"—" }}</li>
-        <li>Avg consumption: {{ rolling_metrics.avg_consumption|default:"—" }}</li>
+        <li>Avg consumption ({{ efficiency_label }}): {{ rolling_metrics.avg_consumption|default:"—" }}</li>
         <li>Avg distance/day: {{ rolling_metrics.avg_distance_per_day|default:"—" }}</li>
         <li>Avg cost/{{ unit_prefs.distance }}: {{ rolling_metrics.avg_cost_per_distance|default:"—" }}</li>
         <li>Total spend: {{ rolling_metrics.total_spend|default:"—" }}</li>
@@ -45,7 +45,7 @@
     <h2>All-time</h2>
     <ul>
         <li>Avg cost per {{ unit_prefs.volume }}: {{ all_time_metrics.avg_cost_per_volume|default:"—" }}</li>
-        <li>Avg consumption: {{ all_time_metrics.avg_consumption|default:"—" }}</li>
+        <li>Avg consumption ({{ efficiency_label }}): {{ all_time_metrics.avg_consumption|default:"—" }}</li>
         <li>Avg distance/day: {{ all_time_metrics.avg_distance_per_day|default:"—" }}</li>
         <li>Avg cost/{{ unit_prefs.distance }}: {{ all_time_metrics.avg_cost_per_distance|default:"—" }}</li>
         <li>Total spend: {{ all_time_metrics.total_spend|default:"—" }}</li>

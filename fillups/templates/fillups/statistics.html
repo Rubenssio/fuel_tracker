@@ -43,7 +43,7 @@
     <h2>Summary</h2>
     <div class="summary-grid">
         <article>
-            <h3>Avg consumption</h3>
+            <h3>Avg consumption ({{ efficiency_label }})</h3>
             <p>{{ summary.avg_consumption|default:"—" }}</p>
         </article>
         <article>
@@ -116,7 +116,7 @@
                     <th>Brand</th>
                     <th>Grade</th>
                     <th>Avg price</th>
-                    <th>Avg consumption</th>
+                    <th>Avg consumption ({{ efficiency_label }})</th>
                     <th>Fill-ups</th>
                 </tr>
             </thead>
