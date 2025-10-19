@@ -1,47 +1,51 @@
 {% extends "base.html" %}
 
+{% block title %}Vehicles · Fuel Tracker{% endblock %}
+
 {% block content %}
-<h1>Your Vehicles</h1>
-<p><a href="/vehicles/add">Add Vehicle</a></p>
-{% if messages %}
-    <ul>
-        {% for message in messages %}
-            <li>{{ message }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
-{% if object_list %}
-    <table border="1" cellpadding="4" cellspacing="0">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Make</th>
-                <th>Model</th>
-                <th>Year</th>
-                <th>Fuel Type</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for object in object_list %}
+<section class="stack-lg">
+    <header class="row">
+        <div class="stack-xs">
+            <h1>Your vehicles</h1>
+            <p class="muted">Keep your garage current to get accurate fuel insights.</p>
+        </div>
+        <a class="button primary" href="/vehicles/add">Add vehicle</a>
+    </header>
+    {% if object_list %}
+        <table>
+            <thead>
                 <tr>
-                    <td>{{ object.name }}</td>
-                    <td>{{ object.make }}</td>
-                    <td>{{ object.model }}</td>
-                    <td>{{ object.year }}</td>
-                    <td>{{ object.fuel_type }}</td>
-                    <td>
-                        <a href="/vehicles/{{ object.pk }}/edit">Edit</a>
-                        <form method="post" action="/vehicles/{{ object.pk }}/delete" style="display:inline">
-                            {% csrf_token %}
-                            <button type="submit">Delete</button>
-                        </form>
-                    </td>
+                    <th scope="col">Name</th>
+                    <th scope="col">Make</th>
+                    <th scope="col">Model</th>
+                    <th scope="col">Year</th>
+                    <th scope="col">Fuel type</th>
+                    <th scope="col" class="right">Actions</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% else %}
-    <p>No vehicles yet. Use the link above to add your first vehicle.</p>
-{% endif %}
+            </thead>
+            <tbody>
+                {% for object in object_list %}
+                    <tr>
+                        <td data-label="Name">{{ object.name }}</td>
+                        <td data-label="Make">{{ object.make }}</td>
+                        <td data-label="Model">{{ object.model }}</td>
+                        <td data-label="Year">{{ object.year }}</td>
+                        <td data-label="Fuel type">{{ object.fuel_type }}</td>
+                        <td data-label="Actions" class="right">
+                            <div class="inline-actions">
+                                <a class="button secondary" href="/vehicles/{{ object.pk }}/edit">Edit</a>
+                                <form method="post" action="/vehicles/{{ object.pk }}/delete" class="inline-form">
+                                    {% csrf_token %}
+                                    <button type="submit" class="secondary">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="muted">No vehicles yet. Use the button above to add your first vehicle.</p>
+    {% endif %}
+</section>
 {% endblock %}

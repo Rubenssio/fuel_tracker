@@ -1,13 +1,23 @@
 {% extends "base.html" %}
 
+{% block title %}Delete account · Fuel Tracker{% endblock %}
+
 {% block content %}
-<h1>Delete account</h1>
-<p>Deleting your account will permanently remove your profile, vehicles, and fill-up history.</p>
-<form method="post">
-    {% csrf_token %}
-    <label for="confirm">Type DELETE to confirm:</label>
-    <input type="text" id="confirm" name="confirm" value="{{ submitted_value|default:"" }}" required>
-    <button type="submit">Delete my account</button>
-</form>
-<p><a href="/">Return home</a></p>
+<section class="stack-md">
+    <header class="stack-xs">
+        <h1>Delete account</h1>
+        <p class="muted">Deleting your account will permanently remove your profile, vehicles, and fill-up history.</p>
+    </header>
+    <form method="post" class="stack-sm">
+        {% csrf_token %}
+        <div class="form-field">
+            <label for="confirm">Type <span class="pill">DELETE</span> to confirm</label>
+            <input type="text" id="confirm" name="confirm" value="{{ submitted_value|default:'' }}" required>
+        </div>
+        <div class="row">
+            <button type="submit" class="primary">Delete my account</button>
+            <a class="button secondary" href="/">Return home</a>
+        </div>
+    </form>
+</section>
 {% endblock %}

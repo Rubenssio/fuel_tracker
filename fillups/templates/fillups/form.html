@@ -1,13 +1,25 @@
 {% extends "base.html" %}
 
+{% block title %}{% if object %}Edit fill-up{% else %}Add fill-up{% endif %} · Fuel Tracker{% endblock %}
+
 {% block content %}
-    <h1>{% if object %}Edit Fill-Up{% else %}Add Fill-Up{% endif %}</h1>
-    <form method="post">
+<section class="stack-lg">
+    <header class="stack-xs">
+        <h1>{% if object %}Edit fill-up{% else %}Add fill-up{% endif %}</h1>
+        <p class="muted">Log details from your latest stop to keep stats fresh.</p>
+    </header>
+    <form method="post" class="stack-md">
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ next_url }}">
-        {{ form.non_field_errors }}
+        {% if form.non_field_errors %}
+            <ul class="errorlist">
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
         {% for field in form %}
-            <p>
+            <div class="form-field">
                 {{ field.label_tag }}
                 {{ field }}
                 {% if field.name == "fuel_brand" %}
@@ -29,13 +41,22 @@
                         {% endfor %}
                     </datalist>
                 {% endif %}
-                {{ field.errors }}
                 {% if field.help_text %}
-                    <small>{{ field.help_text }}</small>
+                    <div class="helptext">{{ field.help_text }}</div>
                 {% endif %}
-            </p>
+                {% if field.errors %}
+                    <ul class="errorlist">
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
         {% endfor %}
-        <button type="submit">Save</button>
-        <a href="{{ cancel_url }}">Cancel</a>
+        <div class="row">
+            <button type="submit" class="primary">Save</button>
+            <a class="button secondary" href="{{ cancel_url }}">Cancel</a>
+        </div>
     </form>
+</section>
 {% endblock %}

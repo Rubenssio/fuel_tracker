@@ -1,6 +1,11 @@
 {% extends "base.html" %}
+
+{% block title %}Permission needed · Fuel Tracker{% endblock %}
+
 {% block content %}
-<h1>Permission needed</h1>
-<p>You don’t have access to that page. If you believe this is a mistake, return home and try another link.</p>
-<p><a href="{% url 'home' %}">Back to home</a></p>
+<section class="stack-md">
+    <h1>Permission needed</h1>
+    <p>You don’t have access to that page. If you believe this is a mistake, return home and try another link.</p>
+    <p><a href="{% url 'home' %}">Back to home</a></p>
+</section>
 {% endblock %}

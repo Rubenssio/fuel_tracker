@@ -1,11 +1,17 @@
 {% extends "base.html" %}
+
+{% block title %}Metrics · Fuel Tracker{% endblock %}
+
 {% block content %}
-<section>
-    <h1>Metrics</h1>
+<section class="stack-lg">
+    <header class="stack-xs">
+        <h1>Metrics</h1>
+        <p class="muted">See rolling trends for cost, consumption, and distance.</p>
+    </header>
     <form method="get" class="filters">
         <fieldset>
             <legend>View options</legend>
-            <div>
+            <div class="form-field">
                 <label for="metrics-vehicle">Vehicle</label>
                 <select id="metrics-vehicle" name="vehicle">
                     <option value="all" {% if selected_vehicle == "all" %}selected{% endif %}>All vehicles</option>
@@ -14,7 +20,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div>
+            <div class="form-field">
                 <label for="metrics-window">Window</label>
                 <select id="metrics-window" name="window">
                     <option value="30" {% if window == "30" %}selected{% endif %}>Last 30 days</option>
@@ -22,34 +28,70 @@
                     <option value="ytd" {% if window == "ytd" %}selected{% endif %}>Year to date</option>
                 </select>
             </div>
-            <div>
-                <button type="submit">Apply</button>
+            <div class="row">
+                <button type="submit" class="primary">Apply</button>
             </div>
         </fieldset>
     </form>
 </section>
 
-<section>
+<section class="stack-md">
     <h2>Rolling ({{ window_label }})</h2>
-    <ul>
-        <li>Avg cost per {{ unit_prefs.volume }}: {{ rolling_metrics.avg_cost_per_volume|default:"—" }}</li>
-        <li>Avg consumption ({{ efficiency_label }}): {{ rolling_metrics.avg_consumption|default:"—" }}</li>
-        <li>Avg distance/day: {{ rolling_metrics.avg_distance_per_day|default:"—" }}</li>
-        <li>Avg cost/{{ unit_prefs.distance }}: {{ rolling_metrics.avg_cost_per_distance|default:"—" }}</li>
-        <li>Total spend: {{ rolling_metrics.total_spend|default:"—" }}</li>
-        <li>Total distance: {{ rolling_metrics.total_distance|default:"—" }}</li>
-    </ul>
+    <div class="summary-grid">
+        <article>
+            <h3>Avg cost per {{ unit_prefs.volume }}</h3>
+            <p>{{ rolling_metrics.avg_cost_per_volume|default:"—" }}</p>
+        </article>
+        <article>
+            <h3>Avg consumption ({{ efficiency_label }})</h3>
+            <p>{{ rolling_metrics.avg_consumption|default:"—" }}</p>
+        </article>
+        <article>
+            <h3>Avg distance/day</h3>
+            <p>{{ rolling_metrics.avg_distance_per_day|default:"—" }}</p>
+        </article>
+        <article>
+            <h3>Avg cost/{{ unit_prefs.distance }}</h3>
+            <p>{{ rolling_metrics.avg_cost_per_distance|default:"—" }}</p>
+        </article>
+        <article>
+            <h3>Total spend</h3>
+            <p>{{ rolling_metrics.total_spend|default:"—" }}</p>
+        </article>
+        <article>
+            <h3>Total distance</h3>
+            <p>{{ rolling_metrics.total_distance|default:"—" }}</p>
+        </article>
+    </div>
 </section>
 
-<section>
+<section class="stack-md">
     <h2>All-time</h2>
-    <ul>
-        <li>Avg cost per {{ unit_prefs.volume }}: {{ all_time_metrics.avg_cost_per_volume|default:"—" }}</li>
-        <li>Avg consumption ({{ efficiency_label }}): {{ all_time_metrics.avg_consumption|default:"—" }}</li>
-        <li>Avg distance/day: {{ all_time_metrics.avg_distance_per_day|default:"—" }}</li>
-        <li>Avg cost/{{ unit_prefs.distance }}: {{ all_time_metrics.avg_cost_per_distance|default:"—" }}</li>
-        <li>Total spend: {{ all_time_metrics.total_spend|default:"—" }}</li>
-        <li>Total distance: {{ all_time_metrics.total_distance|default:"—" }}</li>
-    </ul>
+    <div class="summary-grid">
+        <article>
+            <h3>Avg cost per {{ unit_prefs.volume }}</h3>
+            <p>{{ all_time_metrics.avg_cost_per_volume|default:"—" }}</p>
+        </article>
+        <article>
+            <h3>Avg consumption ({{ efficiency_label }})</h3>
+            <p>{{ all_time_metrics.avg_consumption|default:"—" }}</p>
+        </article>
+        <article>
+            <h3>Avg distance/day</h3>
+            <p>{{ all_time_metrics.avg_distance_per_day|default:"—" }}</p>
+        </article>
+        <article>
+            <h3>Avg cost/{{ unit_prefs.distance }}</h3>
+            <p>{{ all_time_metrics.avg_cost_per_distance|default:"—" }}</p>
+        </article>
+        <article>
+            <h3>Total spend</h3>
+            <p>{{ all_time_metrics.total_spend|default:"—" }}</p>
+        </article>
+        <article>
+            <h3>Total distance</h3>
+            <p>{{ all_time_metrics.total_distance|default:"—" }}</p>
+        </article>
+    </div>
 </section>
 {% endblock %}

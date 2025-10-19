@@ -1,11 +1,17 @@
 {% extends "base.html" %}
+
+{% block title %}Statistics · Fuel Tracker{% endblock %}
+
 {% block content %}
-<section>
-    <h1>Statistics</h1>
-    <form method="get">
+<section class="stack-lg">
+    <header class="stack-xs">
+        <h1>Statistics</h1>
+        <p class="muted">Dig into historical performance and compare brands and grades.</p>
+    </header>
+    <form method="get" class="filters">
         <fieldset>
             <legend>Filters</legend>
-            <div>
+            <div class="form-field">
                 <label for="statistics-vehicle">Vehicle</label>
                 <select id="statistics-vehicle" name="vehicle">
                     <option value="all" {% if selected_vehicle == "all" %}selected{% endif %}>All vehicles</option>
@@ -14,7 +20,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div>
+            <div class="form-field">
                 <label for="statistics-window">Period</label>
                 <select id="statistics-window" name="window">
                     {% for option in window_options %}
@@ -32,14 +38,14 @@
                     {% endfor %}
                 </select>
             </div>
-            <div>
-                <button type="submit">Apply</button>
+            <div class="row">
+                <button type="submit" class="primary">Apply</button>
             </div>
         </fieldset>
     </form>
 </section>
 
-<section>
+<section class="stack-md">
     <h2>Summary</h2>
     <div class="summary-grid">
         <article>
@@ -69,7 +75,7 @@
     </div>
 </section>
 
-<section>
+<section class="stack-md">
     <h2>Cost per {{ unit_prefs.volume }} over time</h2>
     {% if chart_cost.has_data %}
         <svg width="{{ chart_cost.width }}" height="{{ chart_cost.height }}" role="img" aria-label="Cost per {{ unit_prefs.volume }} over time">
@@ -88,7 +94,7 @@
     {% endif %}
 </section>
 
-<section>
+<section class="stack-md">
     <h2>Consumption over time</h2>
     {% if chart_consumption.has_data %}
         <svg width="{{ chart_consumption.width }}" height="{{ chart_consumption.height }}" role="img" aria-label="Fuel consumption over time">
@@ -107,27 +113,27 @@
     {% endif %}
 </section>
 
-<section>
+<section class="stack-md">
     <h2>Brand and grade comparison</h2>
     {% if brand_rows %}
         <table>
             <thead>
                 <tr>
-                    <th>Brand</th>
-                    <th>Grade</th>
-                    <th>Avg price</th>
-                    <th>Avg consumption ({{ efficiency_label }})</th>
-                    <th>Fill-ups</th>
+                    <th scope="col">Brand</th>
+                    <th scope="col">Grade</th>
+                    <th scope="col" class="numeric">Avg price</th>
+                    <th scope="col" class="numeric">Avg consumption ({{ efficiency_label }})</th>
+                    <th scope="col" class="numeric">Fill-ups</th>
                 </tr>
             </thead>
             <tbody>
                 {% for row in brand_rows %}
                     <tr>
-                        <td>{{ row.brand }}</td>
-                        <td>{{ row.grade }}</td>
-                        <td>{{ row.avg_cost_per_volume }}</td>
-                        <td>{{ row.avg_consumption }}</td>
-                        <td>{{ row.count }}</td>
+                        <td data-label="Brand">{{ row.brand }}</td>
+                        <td data-label="Grade">{{ row.grade }}</td>
+                        <td data-label="Avg price" class="numeric">{{ row.avg_cost_per_volume }}</td>
+                        <td data-label="Avg consumption" class="numeric">{{ row.avg_consumption }}</td>
+                        <td data-label="Fill-ups" class="numeric">{{ row.count }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

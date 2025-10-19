@@ -1,11 +1,42 @@
 {% extends "base.html" %}
 
+{% block title %}{% if object %}Edit vehicle{% else %}Add vehicle{% endif %} · Fuel Tracker{% endblock %}
+
 {% block content %}
-<h1>Vehicle</h1>
-<form method="post" novalidate>
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save</button>
-    <a href="/vehicles">Cancel</a>
-</form>
+<section class="stack-lg">
+    <header class="stack-xs">
+        <h1>{% if object %}Edit vehicle{% else %}Add vehicle{% endif %}</h1>
+        <p class="muted">Keep vehicle details up to date for accurate calculations.</p>
+    </header>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <ul class="errorlist">
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% for field in form %}
+            <div class="form-field">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.help_text %}
+                    <div class="helptext">{{ field.help_text }}</div>
+                {% endif %}
+                {% if field.errors %}
+                    <ul class="errorlist">
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <div class="row">
+            <button type="submit" class="primary">Save</button>
+            <a class="button secondary" href="/vehicles">Cancel</a>
+        </div>
+    </form>
+</section>
 {% endblock %}

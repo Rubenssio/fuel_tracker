@@ -1,16 +1,37 @@
 {% extends "base.html" %}
 
+{% block title %}Fuel Tracker{% endblock %}
+
 {% block content %}
-<h1>Fuel Tracker</h1>
-{% if request.user.is_authenticated %}
-<p>Welcome back, {{ request.user.get_username }}.</p>
-<ul>
-    <li><a href="/settings">Update your settings</a></li>
-    <li><a href="/vehicles">Manage your vehicles</a></li>
-</ul>
-<p><a href="/auth/signout">Sign out</a></p>
-{% else %}
-<p>Track your vehicles and fuel history with ease.</p>
-<p><a href="/auth/signin">Sign in</a> or <a href="/auth/signup">create an account</a> to get started.</p>
-{% endif %}
+<section class="stack-lg">
+    <header class="stack-sm">
+        <h1>Fuel Tracker</h1>
+        <p class="muted">Stay on top of your vehicles, fuel economy, and spending in one place.</p>
+    </header>
+    {% if request.user.is_authenticated %}
+        <div class="grid-2">
+            <article class="stack-sm">
+                <h2>Quick actions</h2>
+                <ul class="stack-xs">
+                    <li><a href="/fillups/add?next={{ request.get_full_path|urlencode }}">Log your next fill-up</a></li>
+                    <li><a href="/vehicles">Manage vehicles</a></li>
+                    <li><a href="/history">Review recent fill-ups</a></li>
+                </ul>
+            </article>
+            <article class="stack-sm">
+                <h2>Need to adjust settings?</h2>
+                <p>Update your units, currency, and profile details any time.</p>
+                <a class="button secondary" href="/settings">Go to settings</a>
+            </article>
+        </div>
+    {% else %}
+        <div class="stack-sm">
+            <p>Track vehicles, analyse fuel costs, and stay informed about your driving habits.</p>
+            <div class="row">
+                <a class="button primary" href="/auth/signup">Create an account</a>
+                <a class="button secondary" href="/auth/signin">Sign in</a>
+            </div>
+        </div>
+    {% endif %}
+</section>
 {% endblock %}
