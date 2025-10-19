@@ -68,7 +68,7 @@ class FillUpFormContextMixin:
         queryset = (
             FillUp.objects.filter(vehicle__user=self.request.user)
             .exclude(**{field_name: ""})
-            .order_by(field_name)
+            .order_by()
             .values_list(field_name, flat=True)
             .distinct()
         )
