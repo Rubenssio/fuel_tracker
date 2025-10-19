@@ -4,7 +4,6 @@ from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
-from django.urls import reverse_lazy
 from django.views import View
 
 from .forms import EmailAuthenticationForm, SignupForm
@@ -16,7 +15,7 @@ class SignupView(View):
 
     def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if request.user.is_authenticated:
-            return redirect("success")
+            return redirect("/")
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request: HttpRequest) -> HttpResponse:
@@ -28,7 +27,7 @@ class SignupView(View):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect("success")
+            return redirect("/")
         return render(request, self.template_name, {"form": form})
 
 
@@ -39,9 +38,9 @@ class SigninView(LoginView):
 
     def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if request.user.is_authenticated:
-            return redirect("success")
+            return redirect("/")
         return super().dispatch(request, *args, **kwargs)
 
 
 class SignoutView(LogoutView):
-    next_page = reverse_lazy("success")
+    next_page = "/"
