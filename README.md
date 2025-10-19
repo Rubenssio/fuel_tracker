@@ -22,6 +22,11 @@ After the stack is up, verify the service:
      ```
 
 Stopping the containers (`Ctrl+C`) and re-running the command will reuse the named PostgreSQL volume, keeping the seeded data.
+To reset everything (including the database volume), run:
+
+```bash
+docker compose down -v
+```
 
 ## Auth
 
@@ -56,3 +61,39 @@ Authenticated users can manage their vehicles from simple server-rendered pages:
 - List all vehicles at http://localhost:8000/vehicles.
 - Add a new vehicle at http://localhost:8000/vehicles/add.
 - Edit or delete entries from the list view; deletes are CSRF-protected POST requests.
+
+## Database quick checks (while app is running)
+
+Status and logs:
+
+```
+docker-compose ps
+docker-compose logs -f web
+```
+
+PostgreSQL introspection helpers:
+
+```
+docker-compose exec db psql -U app -d app
+docker-compose exec db psql -U app -d app -c '\dt'
+docker-compose exec db psql -U app -d app -c '\d accounts_user'
+docker-compose exec db psql -U app -d app -c '\d profiles_profile'
+docker-compose exec db psql -U app -d app -c '\d vehicles_vehicle'
+```
+
+Quick table samples:
+
+```
+docker-compose exec db psql -U app -d app -c 'SELECT id, email, is_active, date_joined FROM accounts_user LIMIT 10;'
+docker-compose exec db psql -U app -d app -c 'SELECT id, user_id, display_name, currency, distance_unit, volume_unit, utc_offset_minutes FROM profiles_profile LIMIT 10;'
+docker-compose exec db psql -U app -d app -c 'SELECT id, user_id, name, make, model, year, fuel_type FROM vehicles_vehicle ORDER BY id DESC LIMIT 10;'
+```
+
+Django management helpers:
+
+```
+docker-compose exec web python manage.py showmigrations
+docker-compose exec web python manage.py showmigrations accounts
+docker-compose exec web python manage.py showmigrations profiles
+docker-compose exec web python manage.py showmigrations vehicles
+```
