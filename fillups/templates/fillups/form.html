@@ -4,7 +4,7 @@
     <h1>{% if object %}Edit Fill-Up{% else %}Add Fill-Up{% endif %}</h1>
     <form method="post">
         {% csrf_token %}
-        <input type="hidden" name="next" value="{{ request.GET.next|default:request.POST.next|default:next_url }}">
+        <input type="hidden" name="next" value="{{ next_url }}">
         {{ form.non_field_errors }}
         {% for field in form %}
             <p>

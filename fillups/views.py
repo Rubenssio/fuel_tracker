@@ -49,6 +49,18 @@ def _default_history_url() -> str:
         return "/"
 
 
+def _derive_next_url(request, default: str | None = None) -> str:
+    if default is None:
+        default = _default_history_url()
+
+    candidate = request.GET.get("next") or request.META.get("HTTP_REFERER") or default
+
+    if candidate and url_has_allowed_host_and_scheme(candidate, allowed_hosts={request.get_host()}):
+        return candidate
+
+    return default
+
+
 def _safe_next(request, default: str | None = None) -> str:
     if default is None:
         default = _default_history_url()
@@ -76,12 +88,17 @@ class FillUpFormContextMixin:
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        if self.request.method == "POST":
+            next_url = _safe_next(self.request)
+        else:
+            next_url = _derive_next_url(self.request)
+
         context.update(
             {
                 "brand_options": self._option_values("fuel_brand"),
                 "grade_options": self._option_values("fuel_grade"),
                 "station_options": self._option_values("station_name"),
-                "next_url": self.request.POST.get("next") or self.request.GET.get("next"),
+                "next_url": next_url,
                 "cancel_url": _safe_next(self.request),
             }
         )
