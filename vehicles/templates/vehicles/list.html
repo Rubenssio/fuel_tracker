@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static icons %}
 
 {% block title %}Vehicles · Fuel Tracker{% endblock %}
 
@@ -10,7 +11,7 @@
                 <span class="card-title">Your vehicles</span>
                 <p class="text-muted">Keep your garage current to get accurate fuel insights.</p>
             </div>
-            <a class="btn btn-primary" href="{% url 'vehicle-add' %}"><img src="{% static 'icons/plus.svg' %}" class="icon" alt=""> Add vehicle</a>
+            <a class="btn btn-primary" href="{% url 'vehicle-add' %}">{% icon 'plus' size=18 %} Add vehicle</a>
         </div>
         {% if object_list %}
             <div class="card-body" style="padding:0">
@@ -36,10 +37,10 @@
                                     <td data-label="Fuel type">{{ object.fuel_type }}</td>
                                     <td data-label="Actions" class="num">
                                         <div class="actions">
-                                            <a class="btn btn-secondary btn-sm" href="{% url 'vehicle-edit' object.pk %}"><img src="{% static 'icons/edit.svg' %}" class="icon" alt=""> Edit</a>
+                                            <a class="btn btn-secondary btn-sm" href="{% url 'vehicle-edit' object.pk %}">{% icon 'edit' size=16 %} Edit</a>
                                             <form method="post" action="{% url 'vehicle-delete' object.pk %}" style="display:inline">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-danger btn-sm"><img src="{% static 'icons/trash.svg' %}" class="icon" alt=""> Delete</button>
+                                                <button type="submit" class="btn btn-danger btn-sm">{% icon 'trash' size=16 %} Delete</button>
                                             </form>
                                         </div>
                                     </td>
@@ -55,7 +56,7 @@
                 <div class="stack-xs" style="align-items:center">
                     <h2>No vehicles yet</h2>
                     <p class="text-muted">Add your first vehicle to start tracking fuel performance.</p>
-                    <a class="btn btn-primary" href="{% url 'vehicle-add' %}"><img src="{% static 'icons/plus.svg' %}" class="icon" alt=""> Add vehicle</a>
+                    <a class="btn btn-primary" href="{% url 'vehicle-add' %}">{% icon 'plus' size=18 %} Add vehicle</a>
                 </div>
             </div>
         {% endif %}

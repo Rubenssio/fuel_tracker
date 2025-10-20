@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load icons %}
 
 {% block title %}{% if object %}Edit vehicle{% else %}Add vehicle{% endif %} · Fuel Tracker{% endblock %}
 
@@ -38,7 +39,7 @@
                     </div>
                 {% endfor %}
                 <div class="actions">
-                    <button type="submit" class="btn btn-primary"><img src="{% static 'icons/plus.svg' %}" class="icon" alt=""> Save</button>
+                    <button type="submit" class="btn btn-primary">{% icon 'plus' size=18 %} Save</button>
                     <a class="btn btn-secondary" href="{% url 'vehicle-list' %}">Cancel</a>
                 </div>
             </form>

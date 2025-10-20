@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load icons %}
 
 {% block title %}{% if object %}Edit fill-up{% else %}Add fill-up{% endif %} · Fuel Tracker{% endblock %}
 
@@ -58,7 +59,7 @@
                     </div>
                 {% endfor %}
                 <div class="actions">
-                    <button type="submit" class="btn btn-primary"><img src="{% static 'icons/plus.svg' %}" class="icon" alt=""> Save</button>
+                    <button type="submit" class="btn btn-primary">{% icon 'plus' size=18 %} Save</button>
                     <a class="btn btn-secondary" href="{{ cancel_url }}">Cancel</a>
                 </div>
             </form>
