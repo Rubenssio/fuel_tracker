@@ -14,12 +14,21 @@ Legend: [ ] = todo, [v] = done
 [v] 11 — Observability & Logging: correlation IDs and auth event logs
 [v] 12 — Final pass: clean clone -> docker compose up -> everything reachable and meets performance notes
 
-# UI polish track (run AFTER step 12)
-[ ] UI-01 — Base layout & style system: consistent spacing, typography scale, button/link states, alert/message components
-[ ] UI-02 — Forms UX: inline validation errors, required markers, helpful placeholders/help-text, success/flash messages
-[ ] UI-03 — Lists & tables: consistent table layout, empty states, basic sorting affordances, clear action buttons
-[ ] UI-04 — Navigation & headers: tidy page titles/breadcrumbs, highlight active section, mobile-friendly nav
-[ ] UI-05 — Responsive behavior: small/medium/large breakpoints; ensure core flows usable on phones
-[ ] UI-06 — Accessibility baseline: semantic landmarks, labels for inputs, focus order, keyboard use, color contrast checks
-[ ] UI-07 — Visual consistency pass: normalize margins/paddings, iconography placeholders, consistent component variants
-[ ] UI-08 — Final UI check: screenshots of key pages, quick perf sanity (image sizes, minimal blocking assets)
+
+UI goals (MVP)
+- Simple, modern, lightweight look (no JS frameworks).
+- Cohesive color system and typography.
+- Consistent buttons, cards, tables, and forms.
+- Local SVG icons only; no external assets.
+- Footer stick-to-bottom; responsive up to ~1024px.
+- Accessible color contrast and focus rings.
+
+Process
+- Ship iterative PRs labeled `ui`, each small and self-contained.
+- No fixed steps; review in the browser and tweak.
+
+Definition of done (per PR)
+- No static 404s in dev logs.
+- Icons sized via `.icon` classes (20–28px).
+- Buttons/tables/forms use shared classes.
+- No changes to backend logic.
