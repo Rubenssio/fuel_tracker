@@ -1,24 +1,24 @@
 {% extends "base.html" %}
 
+{% block title %}Vehicles · Fuel Tracker{% endblock %}
+
 {% block content %}
-<h1>Your Vehicles</h1>
-<p><a href="/vehicles/add">Add Vehicle</a></p>
-{% if messages %}
-    <ul>
-        {% for message in messages %}
-            <li>{{ message }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
+<section>
+    <h1>Your vehicles</h1>
+    <p>Keep every vehicle in sync. Add a new ride or update existing details below.</p>
+    <div class="form-actions">
+        <a href="/vehicles/add" class="button button--primary">Add vehicle</a>
+    </div>
+</section>
 {% if object_list %}
-    <table border="1" cellpadding="4" cellspacing="0">
+    <table>
         <thead>
             <tr>
                 <th>Name</th>
                 <th>Make</th>
                 <th>Model</th>
                 <th>Year</th>
-                <th>Fuel Type</th>
+                <th>Fuel type</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -31,17 +31,19 @@
                     <td>{{ object.year }}</td>
                     <td>{{ object.fuel_type }}</td>
                     <td>
-                        <a href="/vehicles/{{ object.pk }}/edit">Edit</a>
-                        <form method="post" action="/vehicles/{{ object.pk }}/delete" style="display:inline">
-                            {% csrf_token %}
-                            <button type="submit">Delete</button>
-                        </form>
+                        <div class="table-actions">
+                            <a href="/vehicles/{{ object.pk }}/edit">Edit</a>
+                            <form method="post" action="/vehicles/{{ object.pk }}/delete" class="inline-form">
+                                {% csrf_token %}
+                                <button type="submit">Delete</button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
 {% else %}
-    <p>No vehicles yet. Use the link above to add your first vehicle.</p>
+    <p>No vehicles yet. Use the button above to add your first vehicle.</p>
 {% endif %}
 {% endblock %}

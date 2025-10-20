@@ -1,38 +1,38 @@
 {% extends "base.html" %}
 
+{% block title %}Sign in · Fuel Tracker{% endblock %}
+
 {% block content %}
-<h1>Sign in</h1>
+<section>
+    <h1>Welcome back</h1>
+    <p>Sign in to review your vehicles, track new fill-ups, and keep your stats current.</p>
+</section>
 <form method="post" novalidate>
     {% csrf_token %}
     {% if form.non_field_errors %}
-        <ul>
+        <ul class="errorlist">
             {% for error in form.non_field_errors %}
                 <li>{{ error }}</li>
             {% endfor %}
         </ul>
     {% endif %}
-    <div>
-        <label for="id_username">Email:</label>
+    <div class="form-field">
+        <label for="id_username">Email</label>
         {{ form.username }}
         {% if form.username.errors %}
-            <ul>
-                {% for error in form.username.errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
+            {{ form.username.errors }}
         {% endif %}
     </div>
-    <div>
-        <label for="id_password">Password:</label>
+    <div class="form-field">
+        <label for="id_password">Password</label>
         {{ form.password }}
         {% if form.password.errors %}
-            <ul>
-                {% for error in form.password.errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
+            {{ form.password.errors }}
         {% endif %}
     </div>
-    <button type="submit">Sign in</button>
+    <div class="form-actions">
+        <button type="submit">Sign in</button>
+        <span class="form-help">Need an account? <a href="/auth/signup">Create one now.</a></span>
+    </div>
 </form>
 {% endblock %}

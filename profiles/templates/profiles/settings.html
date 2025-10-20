@@ -1,85 +1,64 @@
 {% extends "base.html" %}
 
+{% block title %}Settings · Fuel Tracker{% endblock %}
+
 {% block content %}
-<h1>Profile settings — {{ request.user.email }}</h1>
-{% if messages %}
-    <ul>
-        {% for message in messages %}
-            <li>{{ message }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
+<section>
+    <h1>Profile settings</h1>
+    <p>Fine-tune how Fuel Tracker displays your data, including preferred units and your public display name.</p>
+</section>
 <form method="post" novalidate>
     {% csrf_token %}
-    <div>
-        <label for="id_display_name">Display name:</label>
+    {% if form.non_field_errors %}
+        {{ form.non_field_errors }}
+    {% endif %}
+    <div class="form-field">
+        <label for="id_display_name">Display name</label>
         {{ form.display_name }}
         {% if form.display_name.errors %}
-            <ul>
-                {% for error in form.display_name.errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
+            {{ form.display_name.errors }}
         {% endif %}
     </div>
-    <div>
-        <label for="id_currency">Currency (ISO code):</label>
+    <div class="form-field">
+        <label for="id_currency">Currency (ISO code)</label>
         {{ form.currency }}
         {% if form.currency.errors %}
-            <ul>
-                {% for error in form.currency.errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
+            {{ form.currency.errors }}
         {% endif %}
     </div>
-    <div>
-        <label for="id_distance_unit">Distance unit:</label>
+    <div class="form-field">
+        <label for="id_distance_unit">Distance unit</label>
         {{ form.distance_unit }}
         {% if form.distance_unit.errors %}
-            <ul>
-                {% for error in form.distance_unit.errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
+            {{ form.distance_unit.errors }}
         {% endif %}
     </div>
-    <div>
-        <label for="id_volume_unit">Volume unit:</label>
+    <div class="form-field">
+        <label for="id_volume_unit">Volume unit</label>
         {{ form.volume_unit }}
         {% if form.volume_unit.errors %}
-            <ul>
-                {% for error in form.volume_unit.errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
+            {{ form.volume_unit.errors }}
         {% endif %}
     </div>
-    <div>
-        <label for="id_efficiency_unit">Efficiency unit:</label>
+    <div class="form-field">
+        <label for="id_efficiency_unit">Efficiency unit</label>
         {{ form.efficiency_unit }}
         {% if form.efficiency_unit.errors %}
-            <ul>
-                {% for error in form.efficiency_unit.errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
+            {{ form.efficiency_unit.errors }}
         {% endif %}
-        <p><small>Efficiency display is independent of distance/volume preferences.</small></p>
+        <p class="form-help">Efficiency display is independent of distance/volume preferences.</p>
     </div>
-    <div>
-        <label for="id_utc_offset_minutes">Timezone offset:</label>
+    <div class="form-field">
+        <label for="id_utc_offset_minutes">Timezone offset</label>
         {{ form.utc_offset_minutes }}
         {% if form.utc_offset_minutes.errors %}
-            <ul>
-                {% for error in form.utc_offset_minutes.errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
+            {{ form.utc_offset_minutes.errors }}
         {% endif %}
-        <p><small>Timestamps are stored in UTC; this offset will be used later for display.</small></p>
+        <p class="form-help">Timestamps are stored in UTC; this offset will be used later for display.</p>
     </div>
-    <button type="submit">Save settings</button>
+    <div class="form-actions">
+        <button type="submit">Save settings</button>
+    </div>
 </form>
 <section>
     <h2>Preview</h2>

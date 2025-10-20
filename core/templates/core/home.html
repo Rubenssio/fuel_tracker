@@ -1,16 +1,32 @@
 {% extends "base.html" %}
 
+{% block title %}Fuel Tracker{% endblock %}
+
 {% block content %}
-<h1>Fuel Tracker</h1>
+<section class="hero">
+    <h1>Track every drop with confidence</h1>
+    {% if request.user.is_authenticated %}
+        <p>Welcome back, {{ request.user.get_username }}. Jump back into your garage and keep your fueling journey up to date.</p>
+        <div class="form-actions">
+            <a href="/fillups/add?next={{ request.path|urlencode }}" class="button button--primary">Log a fill-up</a>
+            <a href="/vehicles" class="button button--ghost">Manage vehicles</a>
+        </div>
+    {% else %}
+        <p>Fuel Tracker helps you monitor fuel costs, analyse efficiency, and manage every vehicle in one streamlined space.</p>
+        <div class="form-actions">
+            <a href="/auth/signup" class="button button--primary">Create your free account</a>
+            <a href="/auth/signin" class="button button--ghost">Sign in</a>
+        </div>
+    {% endif %}
+</section>
 {% if request.user.is_authenticated %}
-<p>Welcome back, {{ request.user.get_username }}.</p>
-<ul>
-    <li><a href="/settings">Update your settings</a></li>
-    <li><a href="/vehicles">Manage your vehicles</a></li>
-</ul>
-<p><a href="/auth/signout">Sign out</a></p>
-{% else %}
-<p>Track your vehicles and fuel history with ease.</p>
-<p><a href="/auth/signin">Sign in</a> or <a href="/auth/signup">create an account</a> to get started.</p>
+    <section>
+        <h2>Quick links</h2>
+        <ul>
+            <li><a href="/settings">Update your settings</a></li>
+            <li><a href="/vehicles">Manage your vehicles</a></li>
+            <li><a href="/history">View your fill-up history</a></li>
+        </ul>
+    </section>
 {% endif %}
 {% endblock %}

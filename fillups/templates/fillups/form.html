@@ -1,41 +1,47 @@
 {% extends "base.html" %}
 
+{% block title %}{% if object %}Edit Fill-Up{% else %}Add Fill-Up{% endif %} · Fuel Tracker{% endblock %}
+
 {% block content %}
-    <h1>{% if object %}Edit Fill-Up{% else %}Add Fill-Up{% endif %}</h1>
-    <form method="post">
-        {% csrf_token %}
-        <input type="hidden" name="next" value="{{ next_url }}">
+<h1>{% if object %}Edit Fill-Up{% else %}Add Fill-Up{% endif %}</h1>
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next_url }}">
+    {% if form.non_field_errors %}
         {{ form.non_field_errors }}
-        {% for field in form %}
-            <p>
-                {{ field.label_tag }}
-                {{ field }}
-                {% if field.name == "fuel_brand" %}
-                    <datalist id="brand-options">
-                        {% for value in brand_options %}
-                            <option value="{{ value }}"></option>
-                        {% endfor %}
-                    </datalist>
-                {% elif field.name == "fuel_grade" %}
-                    <datalist id="grade-options">
-                        {% for value in grade_options %}
-                            <option value="{{ value }}"></option>
-                        {% endfor %}
-                    </datalist>
-                {% elif field.name == "station_name" %}
-                    <datalist id="station-options">
-                        {% for value in station_options %}
-                            <option value="{{ value }}"></option>
-                        {% endfor %}
-                    </datalist>
-                {% endif %}
-                {{ field.errors }}
-                {% if field.help_text %}
-                    <small>{{ field.help_text }}</small>
-                {% endif %}
-            </p>
-        {% endfor %}
+    {% endif %}
+    {% for field in form %}
+        <div class="form-field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.name == "fuel_brand" %}
+                <datalist id="brand-options">
+                    {% for value in brand_options %}
+                        <option value="{{ value }}"></option>
+                    {% endfor %}
+                </datalist>
+            {% elif field.name == "fuel_grade" %}
+                <datalist id="grade-options">
+                    {% for value in grade_options %}
+                        <option value="{{ value }}"></option>
+                    {% endfor %}
+                </datalist>
+            {% elif field.name == "station_name" %}
+                <datalist id="station-options">
+                    {% for value in station_options %}
+                        <option value="{{ value }}"></option>
+                    {% endfor %}
+                </datalist>
+            {% endif %}
+            {% if field.help_text %}
+                <p class="form-help">{{ field.help_text }}</p>
+            {% endif %}
+            {{ field.errors }}
+        </div>
+    {% endfor %}
+    <div class="form-actions">
         <button type="submit">Save</button>
-        <a href="{{ cancel_url }}">Cancel</a>
-    </form>
+        <a href="{{ cancel_url }}" class="button button--ghost">Cancel</a>
+    </div>
+</form>
 {% endblock %}

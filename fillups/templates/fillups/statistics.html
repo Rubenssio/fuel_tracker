@@ -1,8 +1,12 @@
 {% extends "base.html" %}
+
+{% block title %}Statistics · Fuel Tracker{% endblock %}
+
 {% block content %}
 <section>
     <h1>Statistics</h1>
-    <form method="get">
+    <p>Choose a vehicle and time period to reveal deeper insights into your fuel spend and efficiency.</p>
+    <form method="get" class="filters">
         <fieldset>
             <legend>Filters</legend>
             <div>
@@ -32,7 +36,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div>
+            <div class="form-actions">
                 <button type="submit">Apply</button>
             </div>
         </fieldset>
