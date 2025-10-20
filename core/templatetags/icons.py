@@ -1,8 +1,11 @@
 """SVG icon template tag."""
 from __future__ import annotations
 
+import xml.etree.ElementTree as ET
+
 from django import template
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -138,7 +141,27 @@ def _resolve_size(size: object | None) -> tuple[str | None, str | None]:
     if size_value == 20:
         return None, None
 
-    return None, f"--icon-size:{size_value}px;"
+    return None, f"width: {size_value}px; height: {size_value}px;"
+
+
+def _render_svg(svg_markup: str, class_attr: str, inline_style: str | None) -> str:
+    svg_element = ET.fromstring(svg_markup)
+
+    existing_class = svg_element.get("class")
+    if existing_class:
+        svg_element.set("class", f"{existing_class} {class_attr}")
+    else:
+        svg_element.set("class", class_attr)
+
+    if inline_style:
+        existing_style = svg_element.get("style")
+        if existing_style:
+            prefix = existing_style.rstrip("; ")
+            svg_element.set("style", f"{prefix}; {inline_style}")
+        else:
+            svg_element.set("style", inline_style)
+
+    return mark_safe(ET.tostring(svg_element, encoding="unicode"))
 
 
 @register.simple_tag
@@ -162,10 +185,9 @@ def icon(name: str, size: object = 20, cls: str | None = None) -> str:
         class_tokens.append(size_class)
 
     class_attr = " ".join(token for token in class_tokens if token)
-    style_attr = format_html(' style="{}"', inline_style) if inline_style else ""
 
     if not svg_template:
+        style_attr = format_html(' style="{}"', inline_style) if inline_style else ""
         return format_html('<span class="{} icon-missing" aria-hidden="true"{}></span>', class_attr, style_attr)
 
-    svg_markup = format_html(svg_template)
-    return format_html('<span class="{}" aria-hidden="true"{}>{}</span>', class_attr, style_attr, svg_markup)
+    return _render_svg(svg_template, class_attr, inline_style)
