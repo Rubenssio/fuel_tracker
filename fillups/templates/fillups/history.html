@@ -1,7 +1,11 @@
 {% extends "base.html" %}
+
+{% block title %}History · Fuel Tracker{% endblock %}
+
 {% block content %}
 <section>
-    <h1>History</h1>
+    <h1>Fill-up history</h1>
+    <p>Filter, sort, and review every fill-up you&apos;ve logged. Use the controls below to focus on the details that matter today.</p>
     <form method="get" class="filters">
         <fieldset>
             <legend>Filters</legend>
@@ -36,9 +40,9 @@
             </div>
             <input type="hidden" name="sort" value="{{ sort }}">
             <input type="hidden" name="dir" value="{{ dir }}">
-            <div>
+            <div class="form-actions">
                 <button type="submit">Apply</button>
-                <a href="{% url 'history-list' %}">Clear</a>
+                <a href="{% url 'history-list' %}" class="button button--ghost">Clear</a>
             </div>
         </fieldset>
         <datalist id="brand-options">
@@ -124,12 +128,14 @@
                         <td>{{ fillup.calc.efficiency|default:"—" }}</td>
                         <td>{{ fillup.calc.cost_per_distance|default:"—" }}</td>
                         <td>
-                            <a href="/fillups/{{ fillup.id }}/edit?next={{ request.get_full_path|urlencode }}">Edit</a>
-                            <form method="post" action="/fillups/{{ fillup.id }}/delete" style="display:inline">
-                                {% csrf_token %}
-                                <input type="hidden" name="next" value="{{ request.get_full_path|urlencode }}">
-                                <button type="submit">Delete</button>
-                            </form>
+                            <div class="table-actions">
+                                <a href="/fillups/{{ fillup.id }}/edit?next={{ request.get_full_path|urlencode }}">Edit</a>
+                                <form method="post" action="/fillups/{{ fillup.id }}/delete" class="inline-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path|urlencode }}">
+                                    <button type="submit">Delete</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 {% endfor %}
@@ -140,14 +146,14 @@
             <div>
                 {% if page_obj.has_previous %}
                     {% if base_querystring %}
-                        <a href="?{{ base_querystring }}&page={{ page_obj.previous_page_number }}">Previous</a>
+                        <a href="?{{ base_querystring }}&amp;page={{ page_obj.previous_page_number }}">Previous</a>
                     {% else %}
                         <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
                     {% endif %}
                 {% endif %}
                 {% if page_obj.has_next %}
                     {% if base_querystring %}
-                        <a href="?{{ base_querystring }}&page={{ page_obj.next_page_number }}">Next</a>
+                        <a href="?{{ base_querystring }}&amp;page={{ page_obj.next_page_number }}">Next</a>
                     {% else %}
                         <a href="?page={{ page_obj.next_page_number }}">Next</a>
                     {% endif %}
@@ -156,7 +162,7 @@
         </div>
     {% else %}
         <p>No fill-ups found for your account.</p>
-        <p><a href="/fillups/add?next={{ request.path|urlencode }}">Add Fill-Up</a></p>
+        <p><a href="/fillups/add?next={{ request.path|urlencode }}" class="button button--primary">Add your first fill-up</a></p>
     {% endif %}
 </section>
 {% endblock %}

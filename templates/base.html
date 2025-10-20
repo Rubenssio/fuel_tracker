@@ -1,27 +1,41 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Fuel Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Fuel Tracker{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
 <body>
-    {% include "partials/nav.html" %}
-    {% if messages %}
-        <div class="messages">
-            <ul>
+    <div class="app-background" aria-hidden="true"></div>
+    <div class="app-shell">
+        {% include "partials/nav.html" %}
+        {% if messages %}
+            <div class="flash-messages" role="status">
                 {% for message in messages %}
-                    <li>{{ message }}</li>
+                    <div class="flash-message{% if message.tags %} flash-message--{{ message.tags }}{% endif %}">
+                        {{ message }}
+                    </div>
                 {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
-    <main>
-        {% block content %}{% endblock %}
-    </main>
-    <footer>
-        <a href="/legal/terms">Terms</a>
-        <span>|</span>
-        <a href="/legal/privacy">Privacy</a>
-    </footer>
+            </div>
+        {% endif %}
+        <main class="main-content">
+            <div class="content-card">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+        <footer class="app-footer">
+            <p>&copy; {% now "Y" %} Fuel Tracker</p>
+            <nav aria-label="Legal">
+                <a href="/legal/terms">Terms</a>
+                <span aria-hidden="true">•</span>
+                <a href="/legal/privacy">Privacy</a>
+            </nav>
+        </footer>
+    </div>
 </body>
 </html>

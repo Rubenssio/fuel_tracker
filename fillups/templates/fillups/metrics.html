@@ -1,7 +1,11 @@
 {% extends "base.html" %}
+
+{% block title %}Metrics · Fuel Tracker{% endblock %}
+
 {% block content %}
 <section>
     <h1>Metrics</h1>
+    <p>Adjust the view to explore rolling performance across your vehicles and timeframe.</p>
     <form method="get" class="filters">
         <fieldset>
             <legend>View options</legend>
@@ -22,7 +26,7 @@
                     <option value="ytd" {% if window == "ytd" %}selected{% endif %}>Year to date</option>
                 </select>
             </div>
-            <div>
+            <div class="form-actions">
                 <button type="submit">Apply</button>
             </div>
         </fieldset>
