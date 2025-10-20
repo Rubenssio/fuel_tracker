@@ -1,41 +1,70 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-    <h1>{% if object %}Edit Fill-Up{% else %}Add Fill-Up{% endif %}</h1>
-    <form method="post">
-        {% csrf_token %}
-        <input type="hidden" name="next" value="{{ next_url }}">
-        {{ form.non_field_errors }}
-        {% for field in form %}
-            <p>
-                {{ field.label_tag }}
-                {{ field }}
-                {% if field.name == "fuel_brand" %}
-                    <datalist id="brand-options">
-                        {% for value in brand_options %}
-                            <option value="{{ value }}"></option>
+<div class="card mt-6">
+    <div class="card-body">
+        <h1 class="page-title">{% if object %}Edit Fill-Up{% else %}Add Fill-Up{% endif %}</h1>
+        <form method="post" class="form-row" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next_url }}">
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    <ul>
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
                         {% endfor %}
-                    </datalist>
-                {% elif field.name == "fuel_grade" %}
-                    <datalist id="grade-options">
-                        {% for value in grade_options %}
-                            <option value="{{ value }}"></option>
-                        {% endfor %}
-                    </datalist>
-                {% elif field.name == "station_name" %}
-                    <datalist id="station-options">
-                        {% for value in station_options %}
-                            <option value="{{ value }}"></option>
-                        {% endfor %}
-                    </datalist>
-                {% endif %}
-                {{ field.errors }}
-                {% if field.help_text %}
-                    <small>{{ field.help_text }}</small>
-                {% endif %}
-            </p>
-        {% endfor %}
-        <button type="submit">Save</button>
-        <a href="{{ cancel_url }}">Cancel</a>
-    </form>
+                    </ul>
+                </div>
+            {% endif %}
+            <div class="form-row cols-2 gap-4">
+                {% for field in form %}
+                    <div>
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.name == "fuel_brand" %}
+                            <datalist id="brand-options">
+                                {% for value in brand_options %}
+                                    <option value="{{ value }}"></option>
+                                {% endfor %}
+                            </datalist>
+                        {% elif field.name == "fuel_grade" %}
+                            <datalist id="grade-options">
+                                {% for value in grade_options %}
+                                    <option value="{{ value }}"></option>
+                                {% endfor %}
+                            </datalist>
+                        {% elif field.name == "station_name" %}
+                            <datalist id="station-options">
+                                {% for value in station_options %}
+                                    <option value="{{ value }}"></option>
+                                {% endfor %}
+                            </datalist>
+                        {% endif %}
+                        {% if field.errors %}
+                            <ul>
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {% if field.help_text %}
+                            <small class="muted">{{ field.help_text }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="form-row gap-4 mt-4">
+                <button type="submit" class="btn btn-primary">
+                    {% if object %}
+                        <img class="icon" src="{% static 'icons/edit.svg' %}" alt=""> Save changes
+                    {% else %}
+                        <img class="icon" src="{% static 'icons/plus.svg' %}" alt=""> Save fill-up
+                    {% endif %}
+                </button>
+                <a class="btn btn-ghost" href="{{ cancel_url }}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

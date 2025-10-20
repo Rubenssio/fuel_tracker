@@ -1,13 +1,22 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-<h1>Delete account</h1>
-<p>Deleting your account will permanently remove your profile, vehicles, and fill-up history.</p>
-<form method="post">
-    {% csrf_token %}
-    <label for="confirm">Type DELETE to confirm:</label>
-    <input type="text" id="confirm" name="confirm" value="{{ submitted_value|default:"" }}" required>
-    <button type="submit">Delete my account</button>
-</form>
-<p><a href="/">Return home</a></p>
+<div class="card mt-6">
+    <div class="card-body">
+        <h1 class="page-title">Delete account</h1>
+        <p>Deleting your account will permanently remove your profile, vehicles, and fill-up history.</p>
+        <form method="post" class="form-row gap-4">
+            {% csrf_token %}
+            <div>
+                <label for="confirm">Type DELETE to confirm:</label>
+                <input type="text" id="confirm" name="confirm" value="{{ submitted_value|default:'' }}" required>
+            </div>
+            <div class="form-row gap-4">
+                <button type="submit" class="btn btn-danger"><img class="icon" src="{% static 'icons/trash.svg' %}" alt=""> Delete my account</button>
+                <a class="btn btn-ghost" href="/">Return home</a>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

@@ -1,47 +1,47 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-<h1>Your Vehicles</h1>
-<p><a href="/vehicles/add">Add Vehicle</a></p>
-{% if messages %}
-    <ul>
-        {% for message in messages %}
-            <li>{{ message }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
-{% if object_list %}
-    <table border="1" cellpadding="4" cellspacing="0">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Make</th>
-                <th>Model</th>
-                <th>Year</th>
-                <th>Fuel Type</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for object in object_list %}
-                <tr>
-                    <td>{{ object.name }}</td>
-                    <td>{{ object.make }}</td>
-                    <td>{{ object.model }}</td>
-                    <td>{{ object.year }}</td>
-                    <td>{{ object.fuel_type }}</td>
-                    <td>
-                        <a href="/vehicles/{{ object.pk }}/edit">Edit</a>
-                        <form method="post" action="/vehicles/{{ object.pk }}/delete" style="display:inline">
-                            {% csrf_token %}
-                            <button type="submit">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% else %}
-    <p>No vehicles yet. Use the link above to add your first vehicle.</p>
-{% endif %}
+<div class="card mt-6">
+    <div class="card-body">
+        <h1 class="page-title">Your Vehicles</h1>
+        <div class="mb-4">
+            <a class="btn btn-primary" href="/vehicles/add"><img class="icon" src="{% static 'icons/plus.svg' %}" alt=""> Add Vehicle</a>
+        </div>
+        {% if object_list %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Make</th>
+                        <th>Model</th>
+                        <th>Year</th>
+                        <th>Fuel Type</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for object in object_list %}
+                        <tr>
+                            <td>{{ object.name }}</td>
+                            <td>{{ object.make }}</td>
+                            <td>{{ object.model }}</td>
+                            <td>{{ object.year }}</td>
+                            <td>{{ object.fuel_type }}</td>
+                            <td class="grid gap-4">
+                                <a class="btn btn-secondary" href="/vehicles/{{ object.pk }}/edit"><img class="icon" src="{% static 'icons/edit.svg' %}" alt=""> Edit</a>
+                                <form method="post" action="/vehicles/{{ object.pk }}/delete">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger"><img class="icon" src="{% static 'icons/trash.svg' %}" alt=""> Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No vehicles yet. Use the link above to add your first vehicle.</p>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}
