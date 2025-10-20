@@ -3,9 +3,7 @@
     {% nav_items as NAV %}
     {% for item in NAV %}
         <a href="{{ item.url }}" class="nav-link{% if item.active %} active{% endif %}"{% if item.active %} aria-current="page"{% endif %}>
-            <span class="nav-icon" aria-hidden="true">
-                {% icon item.icon size=20 %}
-            </span>
+            {% icon item.icon size='md' cls='nav-icon' %}
             <span class="nav-label">{{ item.name }}</span>
         </a>
     {% endfor %}

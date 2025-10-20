@@ -13,16 +13,16 @@
     <header class="container site-header">
         <div class="brand">
             <a href="{% url 'home' %}" class="brand-link">
-                {% icon 'home' size=22 %}
+                {% icon 'home' size='lg' %}
                 <span>Fuel Tracker</span>
             </a>
         </div>
         {% include "partials/nav.html" %}
         <div class="header-actions">
             {% if request.user.is_authenticated %}
-                <span class="btn btn-ghost">{% icon 'user' size=18 %} {{ request.user.email }}</span>
-                <a href="{% url 'fillup-add' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-primary">{% icon 'plus' size=18 %} Add fill-up</a>
-                <a href="{% url 'accounts:signout' %}" class="btn btn-secondary">{% icon 'logout' size=18 %} Sign out</a>
+                <span class="btn btn-ghost">{% icon 'user' size='sm' %}<span>{{ request.user.email }}</span></span>
+                <a href="{% url 'fillup-add' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-primary">{% icon 'plus' size='sm' %}<span>Add fill-up</span></a>
+                <a href="{% url 'accounts:signout' %}" class="btn btn-secondary">{% icon 'logout' size='sm' %}<span>Sign out</span></a>
             {% else %}
                 <a href="{% url 'accounts:signin' %}" class="btn btn-primary">Sign in</a>
             {% endif %}

@@ -11,7 +11,7 @@
                 <span class="card-title">History</span>
                 <p class="text-muted">Filter, review, and update every fill-up you have recorded.</p>
             </div>
-            <a class="btn btn-primary" href="{% url 'fillup-add' %}?next={{ request.get_full_path|urlencode }}">{% icon 'plus' size=18 %} Add fill-up</a>
+            <a class="btn btn-primary" href="{% url 'fillup-add' %}?next={{ request.get_full_path|urlencode }}">{% icon 'plus' size='sm' %}<span>Add fill-up</span></a>
         </div>
         <div class="card-body">
             <form method="get" class="form grid grid-2">
@@ -136,11 +136,11 @@
                                 <td data-label="Cost per {{ unit_prefs.distance }}" class="num">{{ fillup.calc.cost_per_distance|default:"—" }}</td>
                                 <td data-label="Actions" class="num">
                                     <div class="actions">
-                                        <a class="btn btn-secondary btn-sm" href="{% url 'fillup-edit' fillup.id %}?next={{ request.get_full_path|urlencode }}">{% icon 'edit' size=16 %} Edit</a>
+                                        <a class="btn btn-secondary btn-sm" href="{% url 'fillup-edit' fillup.id %}?next={{ request.get_full_path|urlencode }}">{% icon 'edit' size='sm' %}<span>Edit</span></a>
                                         <form method="post" action="{% url 'fillup-delete' fillup.id %}" style="display:inline">
                                             {% csrf_token %}
                                             <input type="hidden" name="next" value="{{ request.get_full_path|urlencode }}">
-                                            <button type="submit" class="btn btn-danger btn-sm">{% icon 'trash' size=16 %} Delete</button>
+                                            <button type="submit" class="btn btn-danger btn-sm">{% icon 'trash' size='sm' %}<span>Delete</span></button>
                                         </form>
                                     </div>
                                 </td>
@@ -176,7 +176,7 @@
                 <div class="stack-xs" style="align-items:center">
                     <h2>No fill-ups found</h2>
                     <p class="text-muted">Start logging your fuel stops to see history and metrics here.</p>
-                    <a class="btn btn-primary" href="{% url 'fillup-add' %}?next={{ request.path|urlencode }}">{% icon 'plus' size=18 %} Add fill-up</a>
+                    <a class="btn btn-primary" href="{% url 'fillup-add' %}?next={{ request.path|urlencode }}">{% icon 'plus' size='sm' %}<span>Add fill-up</span></a>
                 </div>
             </div>
         {% endif %}
