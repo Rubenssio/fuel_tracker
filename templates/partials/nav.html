@@ -1,10 +1,12 @@
 {% load nav icons %}
-<nav class="primary-nav" aria-label="Main navigation">
-    {% nav_items as NAV %}
+{% nav_items as NAV %}
+<ul class="primary-nav navbar-nav me-lg-4 mb-2 mb-lg-0" aria-label="Main navigation">
     {% for item in NAV %}
-        <a href="{{ item.url }}" class="nav-link{% if item.active %} active{% endif %}"{% if item.active %} aria-current="page"{% endif %}>
-            {% icon item.icon size='md' cls='nav-icon' %}
-            <span class="nav-label">{{ item.name }}</span>
-        </a>
+        <li class="nav-item">
+            <a href="{{ item.url }}" class="nav-link d-flex align-items-center gap-2{% if item.active %} active{% endif %}"{% if item.active %} aria-current="page"{% endif %}>
+                {% icon item.icon size='md' cls='nav-icon' %}
+                <span class="nav-label">{{ item.name }}</span>
+            </a>
+        </li>
     {% endfor %}
-</nav>
+</ul>
