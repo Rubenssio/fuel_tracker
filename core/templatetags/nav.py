@@ -39,7 +39,7 @@ def nav_items(context: template.Context) -> list[dict[str, Any]]:
         {
             "name": "History",
             "url_name": "history-list",
-            "icon": "history",
+            "icon": "gas",
             "matches": {"history-list", "fillup-edit", "fillup-delete", "fillup-add"},
         },
         {
@@ -51,13 +51,13 @@ def nav_items(context: template.Context) -> list[dict[str, Any]]:
         {
             "name": "Statistics",
             "url_name": "statistics",
-            "icon": "stats",
+            "icon": "chart",
             "matches": {"statistics"},
         },
         {
             "name": "Settings",
             "url_name": "profiles:settings",
-            "icon": "gear",
+            "icon": "cog",
             "matches": {"profiles:settings", "settings"},
         },
     ]

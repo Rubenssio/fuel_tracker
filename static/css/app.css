@@ -275,8 +275,6 @@ p {
 }
 
 .nav-icon svg {
-  width: 24px;
-  height: 24px;
   display: block;
 }
 
@@ -297,10 +295,16 @@ p {
 }
 
 .icon {
-  width: 24px;
-  height: 24px;
   display: inline-block;
-  vertical-align: -4px;
+  vertical-align: -0.125em;
+}
+
+.icon svg,
+.icon img {
+  display: inline-block;
+  vertical-align: -0.125em;
+  max-width: none;
+  max-height: none;
 }
 
 .badge {
