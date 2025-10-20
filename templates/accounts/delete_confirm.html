@@ -3,21 +3,27 @@
 {% block title %}Delete account · Fuel Tracker{% endblock %}
 
 {% block content %}
-<section class="stack-md">
-    <header class="stack-xs">
-        <h1>Delete account</h1>
-        <p class="muted">Deleting your account will permanently remove your profile, vehicles, and fill-up history.</p>
-    </header>
-    <form method="post" class="stack-sm">
-        {% csrf_token %}
-        <div class="form-field">
-            <label for="confirm">Type <span class="pill">DELETE</span> to confirm</label>
-            <input type="text" id="confirm" name="confirm" value="{{ submitted_value|default:'' }}" required>
+<section class="stack">
+    <article class="card" style="max-width:540px;margin:0 auto;">
+        <div class="card-header">
+            <div class="stack-xs">
+                <span class="card-title">Delete account</span>
+                <p class="text-muted">Deleting your account will permanently remove your profile, vehicles, and fill-up history.</p>
+            </div>
         </div>
-        <div class="row">
-            <button type="submit" class="primary">Delete my account</button>
-            <a class="button secondary" href="/">Return home</a>
+        <div class="card-body">
+            <form method="post" class="form">
+                {% csrf_token %}
+                <div class="field">
+                    <label for="confirm">Type <span class="pill">DELETE</span> to confirm</label>
+                    <input type="text" id="confirm" name="confirm" value="{{ submitted_value|default:'' }}" required>
+                </div>
+                <div class="actions">
+                    <button type="submit" class="btn btn-danger">Delete my account</button>
+                    <a class="btn btn-secondary" href="{% url 'home' %}">Return home</a>
+                </div>
+            </form>
         </div>
-    </form>
+    </article>
 </section>
 {% endblock %}

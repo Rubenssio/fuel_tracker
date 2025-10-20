@@ -3,49 +3,55 @@
 {% block title %}Sign in · Fuel Tracker{% endblock %}
 
 {% block content %}
-<section class="stack-md">
-    <header class="stack-xs">
-        <h1>Sign in</h1>
-        <p class="muted">Access your vehicles, fill-ups, and metrics.</p>
-    </header>
-    <form method="post" novalidate>
-        {% csrf_token %}
-        {% if next %}
-            <input type="hidden" name="next" value="{{ next }}">
-        {% endif %}
-        {% if form.non_field_errors %}
-            <ul class="errorlist">
-                {% for error in form.non_field_errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-        <div class="form-field">
-            <label for="id_username">Email</label>
-            {{ form.username }}
-            {% if form.username.errors %}
-                <ul class="errorlist">
-                    {% for error in form.username.errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
+<section class="stack">
+    <article class="card" style="max-width:540px;margin:0 auto;">
+        <div class="card-header">
+            <div class="stack-xs">
+                <span class="card-title">Sign in</span>
+                <p class="text-muted">Access your vehicles, fill-ups, and metrics.</p>
+            </div>
         </div>
-        <div class="form-field">
-            <label for="id_password">Password</label>
-            {{ form.password }}
-            {% if form.password.errors %}
-                <ul class="errorlist">
-                    {% for error in form.password.errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
+        <div class="card-body">
+            <form method="post" novalidate class="form">
+                {% csrf_token %}
+                {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                {% endif %}
+                {% if form.non_field_errors %}
+                    <ul class="errorlist">
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <div class="field">
+                    <label for="id_username">Email</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.username.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                <div class="field">
+                    <label for="id_password">Password</label>
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.password.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                <div class="actions">
+                    <button type="submit" class="btn btn-primary">Sign in</button>
+                    <a class="btn btn-secondary" href="{% url 'accounts:signup' %}">Need an account?</a>
+                </div>
+            </form>
         </div>
-        <div class="row">
-            <button type="submit" class="primary">Sign in</button>
-            <a class="button secondary" href="/auth/signup">Need an account?</a>
-        </div>
-    </form>
+    </article>
 </section>
 {% endblock %}

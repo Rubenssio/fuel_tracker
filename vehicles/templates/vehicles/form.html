@@ -3,40 +3,46 @@
 {% block title %}{% if object %}Edit vehicle{% else %}Add vehicle{% endif %} · Fuel Tracker{% endblock %}
 
 {% block content %}
-<section class="stack-lg">
-    <header class="stack-xs">
-        <h1>{% if object %}Edit vehicle{% else %}Add vehicle{% endif %}</h1>
-        <p class="muted">Keep vehicle details up to date for accurate calculations.</p>
-    </header>
-    <form method="post" novalidate>
-        {% csrf_token %}
-        {% if form.non_field_errors %}
-            <ul class="errorlist">
-                {% for error in form.non_field_errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-        {% for field in form %}
-            <div class="form-field">
-                {{ field.label_tag }}
-                {{ field }}
-                {% if field.help_text %}
-                    <div class="helptext">{{ field.help_text }}</div>
-                {% endif %}
-                {% if field.errors %}
+<section class="stack">
+    <article class="card">
+        <div class="card-header">
+            <div class="stack-xs">
+                <span class="card-title">{% if object %}Edit vehicle{% else %}Add vehicle{% endif %}</span>
+                <p class="text-muted">Keep vehicle details up to date for accurate calculations.</p>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="post" novalidate class="form">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
                     <ul class="errorlist">
-                        {% for error in field.errors %}
+                        {% for error in form.non_field_errors %}
                             <li>{{ error }}</li>
                         {% endfor %}
                     </ul>
                 {% endif %}
-            </div>
-        {% endfor %}
-        <div class="row">
-            <button type="submit" class="primary">Save</button>
-            <a class="button secondary" href="/vehicles">Cancel</a>
+                {% for field in form %}
+                    <div class="field">
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.help_text %}
+                            <div class="helptext">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% if field.errors %}
+                            <ul class="errorlist">
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <div class="actions">
+                    <button type="submit" class="btn btn-primary"><img src="{% static 'icons/plus.svg' %}" class="icon" alt=""> Save</button>
+                    <a class="btn btn-secondary" href="{% url 'vehicle-list' %}">Cancel</a>
+                </div>
+            </form>
         </div>
-    </form>
+    </article>
 </section>
 {% endblock %}
