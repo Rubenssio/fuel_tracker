@@ -10,40 +10,24 @@
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
 <body>
-    {% with url_name=request.resolver_match.url_name|default:'' %}
-        <header class="container" style="padding:18px 0;display:flex;align-items:center;gap:16px;justify-content:space-between">
-            <a href="{% url 'home' %}" class="btn btn-ghost" style="gap:10px">
+    <header class="container site-header">
+        <div class="brand">
+            <a href="{% url 'home' %}" class="brand-link">
                 <img src="{% static 'icons/home.svg' %}" class="icon" alt="">
-                <strong>Fuel Tracker</strong>
+                <span>Fuel Tracker</span>
             </a>
-            <nav style="display:flex;gap:8px;flex-wrap:wrap">
-                <a href="{% url 'vehicle-list' %}" class="btn btn-ghost{% if url_name == 'vehicle-list' or url_name == 'vehicle-add' or url_name == 'vehicle-edit' or url_name == 'vehicle-delete' %} active{% endif %}">
-                    <img src="{% static 'icons/car.svg' %}" class="icon" alt=""> Vehicles
-                </a>
-                <a href="{% url 'history-list' %}" class="btn btn-ghost{% if url_name == 'history-list' or url_name == 'fillup-edit' or url_name == 'fillup-delete' %} active{% endif %}">
-                    <img src="{% static 'icons/history.svg' %}" class="icon" alt=""> History
-                </a>
-                <a href="{% url 'metrics' %}" class="btn btn-ghost{% if url_name == 'metrics' %} active{% endif %}">
-                    <img src="{% static 'icons/chart.svg' %}" class="icon" alt=""> Metrics
-                </a>
-                <a href="{% url 'statistics' %}" class="btn btn-ghost{% if url_name == 'statistics' %} active{% endif %}">
-                    <img src="{% static 'icons/stats.svg' %}" class="icon" alt=""> Statistics
-                </a>
-                <a href="{% url 'profiles:settings' %}" class="btn btn-ghost{% if url_name == 'settings' %} active{% endif %}">
-                    <img src="{% static 'icons/settings.svg' %}" class="icon" alt=""> Settings
-                </a>
-            </nav>
-            <div style="display:flex;gap:8px">
-                {% if request.user.is_authenticated %}
-                    <span class="btn btn-ghost"><img src="{% static 'icons/user.svg' %}" class="icon" alt=""> {{ request.user.email }}</span>
-                    <a href="{% url 'fillup-add' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-primary"><img src="{% static 'icons/plus.svg' %}" class="icon" alt=""> Add fill-up</a>
-                    <a href="{% url 'accounts:signout' %}" class="btn btn-secondary"><img src="{% static 'icons/logout.svg' %}" class="icon" alt=""> Sign out</a>
-                {% else %}
-                    <a href="{% url 'accounts:signin' %}" class="btn btn-primary">Sign in</a>
-                {% endif %}
-            </div>
-        </header>
-    {% endwith %}
+        </div>
+        {% include "partials/nav.html" %}
+        <div class="header-actions">
+            {% if request.user.is_authenticated %}
+                <span class="btn btn-ghost"><img src="{% static 'icons/user.svg' %}" class="icon" alt=""> {{ request.user.email }}</span>
+                <a href="{% url 'fillup-add' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-primary"><img src="{% static 'icons/plus.svg' %}" class="icon" alt=""> Add fill-up</a>
+                <a href="{% url 'accounts:signout' %}" class="btn btn-secondary"><img src="{% static 'icons/logout.svg' %}" class="icon" alt=""> Sign out</a>
+            {% else %}
+                <a href="{% url 'accounts:signin' %}" class="btn btn-primary">Sign in</a>
+            {% endif %}
+        </div>
+    </header>
     {% if messages %}
         <div class="messages container">
             <ul>

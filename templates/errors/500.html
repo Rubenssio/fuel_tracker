@@ -1,11 +1,14 @@
-{% extends "base.html" %}
-
-{% block title %}Server error · Fuel Tracker{% endblock %}
-
-{% block content %}
-<section class="stack-md">
-    <h1>Something went wrong</h1>
-    <p>Sorry—an unexpected error occurred. Please try again in a moment.</p>
-    <p><a href="{% url 'home' %}">Back to home</a></p>
-</section>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Server error · Fuel Tracker</title>
+</head>
+<body>
+    <main>
+        <h1>Something went wrong</h1>
+        <p>Sorry—an unexpected error occurred. Please try again in a moment.</p>
+        <p><a href="{% url 'home' %}">Back to home</a></p>
+    </main>
+</body>
+</html>
