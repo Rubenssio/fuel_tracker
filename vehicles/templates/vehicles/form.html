@@ -1,11 +1,18 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-<h1>Vehicle</h1>
-<form method="post" novalidate>
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save</button>
-    <a href="/vehicles">Cancel</a>
-</form>
+<div class="card mt-6">
+    <div class="card-body">
+        <h1 class="page-title">Vehicle</h1>
+        <form method="post" novalidate class="form-row">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="form-row gap-4">
+                <button type="submit" class="btn btn-primary"><img class="icon" src="{% static 'icons/edit.svg' %}" alt=""> Save</button>
+                <a class="btn btn-ghost" href="/vehicles">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

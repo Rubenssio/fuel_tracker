@@ -1,27 +1,42 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <title>Fuel Tracker</title>
+    <link rel="icon" href="{% static 'icons/car.svg' %}" type="image/svg+xml">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
 <body>
-    {% include "partials/nav.html" %}
-    {% if messages %}
-        <div class="messages">
-            <ul>
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
+    <header class="site">
+        <div class="container">
+            {% include "partials/nav.html" %}
         </div>
-    {% endif %}
+    </header>
+
     <main>
-        {% block content %}{% endblock %}
+        <div class="container">
+            {% if messages %}
+                <div class="card mt-4 mb-4">
+                    <div class="card-body">
+                        <div class="alert">
+                            <ul>
+                                {% for message in messages %}
+                                    <li>{{ message }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </div>
     </main>
-    <footer>
-        <a href="/legal/terms">Terms</a>
-        <span>|</span>
-        <a href="/legal/privacy">Privacy</a>
+
+    <footer class="site">
+        <div class="container" style="padding:16px 0">
+            <small class="muted">© {% now "Y" %} Fuel Tracker · <a href="/legal/privacy">Privacy</a> · <a href="/legal/terms">Terms</a></small>
+        </div>
     </footer>
 </body>
 </html>

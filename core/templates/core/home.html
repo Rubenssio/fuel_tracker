@@ -1,16 +1,26 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-<h1>Fuel Tracker</h1>
-{% if request.user.is_authenticated %}
-<p>Welcome back, {{ request.user.get_username }}.</p>
-<ul>
-    <li><a href="/settings">Update your settings</a></li>
-    <li><a href="/vehicles">Manage your vehicles</a></li>
-</ul>
-<p><a href="/auth/signout">Sign out</a></p>
-{% else %}
-<p>Track your vehicles and fuel history with ease.</p>
-<p><a href="/auth/signin">Sign in</a> or <a href="/auth/signup">create an account</a> to get started.</p>
-{% endif %}
+<div class="card mt-6">
+    <div class="card-body">
+        <h1 class="page-title">Fuel Tracker</h1>
+        {% if request.user.is_authenticated %}
+            <p>Welcome back, {{ request.user.get_username }}.</p>
+            <div class="mt-4 grid gap-4">
+                <a class="btn btn-secondary" href="/settings"><img class="icon" src="{% static 'icons/settings.svg' %}" alt=""> Update your settings</a>
+                <a class="btn btn-secondary" href="/vehicles"><img class="icon" src="{% static 'icons/car.svg' %}" alt=""> Manage your vehicles</a>
+            </div>
+            <div class="mt-6">
+                <a class="btn btn-ghost" href="/auth/signout"><img class="icon" src="{% static 'icons/logout.svg' %}" alt=""> Sign out</a>
+            </div>
+        {% else %}
+            <p>Track your vehicles and fuel history with ease.</p>
+            <p class="mt-4">
+                <a class="btn btn-primary" href="/auth/signin"><img class="icon" src="{% static 'icons/user.svg' %}" alt=""> Sign in</a>
+                <a class="btn btn-secondary" href="/auth/signup"><img class="icon" src="{% static 'icons/plus.svg' %}" alt=""> Create an account</a>
+            </p>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

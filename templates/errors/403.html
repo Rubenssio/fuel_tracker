@@ -1,6 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
-<h1>Permission needed</h1>
-<p>You don’t have access to that page. If you believe this is a mistake, return home and try another link.</p>
-<p><a href="{% url 'home' %}">Back to home</a></p>
+<div class="card mt-6">
+    <div class="card-body">
+        <h1 class="page-title">Permission needed</h1>
+        <p>You don’t have access to that page. If you believe this is a mistake, return home and try another link.</p>
+        <a class="btn btn-secondary" href="{% url 'home' %}"><img class="icon" src="{% static 'icons/home.svg' %}" alt=""> Back to home</a>
+    </div>
+</div>
 {% endblock %}

@@ -1,0 +1,5 @@
+.mt-4{margin-top:var(--space-4)} .mb-4{margin-bottom:var(--space-4)}
+.mt-6{margin-top:var(--space-6)} .mb-6{margin-bottom:var(--space-6)}
+.gap-4{gap:var(--space-4)} .gap-6{gap:var(--space-6)}
+.grid{display:grid} .grid-2{grid-template-columns:1fr 1fr}
+.right{margin-left:auto}

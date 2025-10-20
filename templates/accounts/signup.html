@@ -1,50 +1,59 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-<h1>Create an account</h1>
-<form method="post" novalidate>
-    {% csrf_token %}
-    {% if form.non_field_errors %}
-        <ul>
-            {% for error in form.non_field_errors %}
-                <li>{{ error }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-    <div>
-        <label for="id_email">Email:</label>
-        {{ form.email }}
-        {% if form.email.errors %}
-            <ul>
-                {% for error in form.email.errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
+<div class="card mt-6">
+    <div class="card-body">
+        <h1 class="page-title">Create an account</h1>
+        <form method="post" novalidate class="form-row gap-4">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    <ul>
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            <div>
+                <label for="id_email">Email:</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <ul>
+                        {% for error in form.email.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            <div>
+                <label for="id_password1">Password:</label>
+                {{ form.password1 }}
+                {% if form.password1.help_text %}<p class="muted">{{ form.password1.help_text }}</p>{% endif %}
+                {% if form.password1.errors %}
+                    <ul>
+                        {% for error in form.password1.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            <div>
+                <label for="id_password2">Confirm password:</label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                    <ul>
+                        {% for error in form.password2.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            <div class="form-row gap-4">
+                <button type="submit" class="btn btn-primary"><img class="icon" src="{% static 'icons/plus.svg' %}" alt=""> Sign up</button>
+            </div>
+        </form>
     </div>
-    <div>
-        <label for="id_password1">Password:</label>
-        {{ form.password1 }}
-        {% if form.password1.help_text %}<p>{{ form.password1.help_text }}</p>{% endif %}
-        {% if form.password1.errors %}
-            <ul>
-                {% for error in form.password1.errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    </div>
-    <div>
-        <label for="id_password2">Confirm password:</label>
-        {{ form.password2 }}
-        {% if form.password2.errors %}
-            <ul>
-                {% for error in form.password2.errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    </div>
-    <button type="submit">Sign up</button>
-</form>
+</div>
 {% endblock %}
