@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Fuel Tracker</h1>
+{% if request.user.is_authenticated %}
+<p>Welcome back, {{ request.user.get_username }}.</p>
+<ul>
+    <li><a href="/settings">Update your settings</a></li>
+    <li><a href="/vehicles">Manage your vehicles</a></li>
+</ul>
+<p><a href="/auth/signout">Sign out</a></p>
+{% else %}
+<p>Track your vehicles and fuel history with ease.</p>
+<p><a href="/auth/signin">Sign in</a> or <a href="/auth/signup">create an account</a> to get started.</p>
+{% endif %}
+{% endblock %}

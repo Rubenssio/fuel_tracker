@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block content %}
+<section>
+    <h1>History</h1>
+    <form method="get" class="filters">
+        <fieldset>
+            <legend>Filters</legend>
+            <div>
+                <label for="filter-start">Start date</label>
+                <input type="date" id="filter-start" name="start" value="{{ active_filters.start|default:'' }}">
+            </div>
+            <div>
+                <label for="filter-end">End date</label>
+                <input type="date" id="filter-end" name="end" value="{{ active_filters.end|default:'' }}">
+            </div>
+            <div>
+                <label for="filter-brand">Brand</label>
+                <input type="text" id="filter-brand" name="brand" list="brand-options" value="{{ active_filters.brand|default:'' }}">
+            </div>
+            <div>
+                <label for="filter-grade">Grade</label>
+                <input type="text" id="filter-grade" name="grade" list="grade-options" value="{{ active_filters.grade|default:'' }}">
+            </div>
+            <div>
+                <label for="filter-station">Station</label>
+                <input type="text" id="filter-station" name="station" list="station-options" value="{{ active_filters.station|default:'' }}">
+            </div>
+            <div>
+                <label for="filter-vehicle">Vehicle</label>
+                <select id="filter-vehicle" name="vehicle">
+                    <option value="">All vehicles</option>
+                    {% for vehicle in vehicles %}
+                        <option value="{{ vehicle.id }}" {% if active_filters.vehicle == vehicle.id|stringformat:"s" %}selected{% endif %}>{{ vehicle.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <input type="hidden" name="sort" value="{{ sort }}">
+            <input type="hidden" name="dir" value="{{ dir }}">
+            <div>
+                <button type="submit">Apply</button>
+                <a href="{% url 'history-list' %}">Clear</a>
+            </div>
+        </fieldset>
+        <datalist id="brand-options">
+            {% for value in brand_options %}
+                <option value="{{ value }}"></option>
+            {% endfor %}
+        </datalist>
+        <datalist id="grade-options">
+            {% for value in grade_options %}
+                <option value="{{ value }}"></option>
+            {% endfor %}
+        </datalist>
+        <datalist id="station-options">
+            {% for value in station_options %}
+                <option value="{{ value }}"></option>
+            {% endfor %}
+        </datalist>
+    </form>
+</section>
+
+<section>
+    {% if fillups %}
+        <table>
+            <thead>
+                <tr>
+                    <th>
+                        {% if sort_links.date %}
+                            <a href="?{{ sort_links.date }}">Date</a>
+                        {% else %}
+                            Date
+                        {% endif %}
+                        {% if sort == "date" %}
+                            {% if dir == "asc" %}↑{% else %}↓{% endif %}
+                        {% endif %}
+                    </th>
+                    <th>Vehicle</th>
+                    <th>Station</th>
+                    <th>
+                        <a href="?{{ sort_links.odometer }}">Odometer</a>
+                        {% if sort == "odometer" %}
+                            {% if dir == "asc" %}↑{% else %}↓{% endif %}
+                        {% endif %}
+                    </th>
+                    <th>
+                        <a href="?{{ sort_links.liters }}">Volume</a>
+                        {% if sort == "liters" %}
+                            {% if dir == "asc" %}↑{% else %}↓{% endif %}
+                        {% endif %}
+                    </th>
+                    <th>
+                        <a href="?{{ sort_links.total }}">Total</a>
+                        {% if sort == "total" %}
+                            {% if dir == "asc" %}↑{% else %}↓{% endif %}
+                        {% endif %}
+                    </th>
+                    <th>Dist since last ({{ unit_prefs.distance }})</th>
+                    <th>Unit price ({{ unit_prefs.currency }}/{{ unit_prefs.volume }})</th>
+                    <th>Efficiency ({{ efficiency_label }})</th>
+                    <th>Cost/{{ unit_prefs.distance }}</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fillup in fillups %}
+                    <tr>
+                        <td>{{ fillup.date }}</td>
+                        <td>{{ fillup.vehicle.name }}</td>
+                        <td>
+                            <div>{{ fillup.station_name }}</div>
+                            {% if fillup.fuel_brand or fillup.fuel_grade %}
+                                <small>
+                                    {% if fillup.fuel_brand %}{{ fillup.fuel_brand }}{% endif %}
+                                    {% if fillup.fuel_brand and fillup.fuel_grade %} — {% endif %}
+                                    {% if fillup.fuel_grade %}{{ fillup.fuel_grade }}{% endif %}
+                                </small>
+                            {% endif %}
+                        </td>
+                        <td>{{ fillup.display_odometer }} {{ unit_prefs.distance }}</td>
+                        <td>{{ fillup.display_volume }} {{ unit_prefs.volume }}</td>
+                        <td>{{ fillup.display_total }}</td>
+                        <td>{{ fillup.calc.distance_since_last|default:"—" }}</td>
+                        <td>{{ fillup.calc.unit_price|default:"—" }}</td>
+                        <td>{{ fillup.calc.efficiency|default:"—" }}</td>
+                        <td>{{ fillup.calc.cost_per_distance|default:"—" }}</td>
+                        <td>
+                            <a href="/fillups/{{ fillup.id }}/edit?next={{ request.get_full_path|urlencode }}">Edit</a>
+                            <form method="post" action="/fillups/{{ fillup.id }}/delete" style="display:inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path|urlencode }}">
+                                <button type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="pagination">
+            <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            <div>
+                {% if page_obj.has_previous %}
+                    {% if base_querystring %}
+                        <a href="?{{ base_querystring }}&page={{ page_obj.previous_page_number }}">Previous</a>
+                    {% else %}
+                        <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    {% endif %}
+                {% endif %}
+                {% if page_obj.has_next %}
+                    {% if base_querystring %}
+                        <a href="?{{ base_querystring }}&page={{ page_obj.next_page_number }}">Next</a>
+                    {% else %}
+                        <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    {% else %}
+        <p>No fill-ups found for your account.</p>
+        <p><a href="/fillups/add?next={{ request.path|urlencode }}">Add Fill-Up</a></p>
+    {% endif %}
+</section>
+{% endblock %}

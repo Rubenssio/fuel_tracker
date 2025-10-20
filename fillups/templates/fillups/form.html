@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>{% if object %}Edit Fill-Up{% else %}Add Fill-Up{% endif %}</h1>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next_url }}">
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            <p>
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.name == "fuel_brand" %}
+                    <datalist id="brand-options">
+                        {% for value in brand_options %}
+                            <option value="{{ value }}"></option>
+                        {% endfor %}
+                    </datalist>
+                {% elif field.name == "fuel_grade" %}
+                    <datalist id="grade-options">
+                        {% for value in grade_options %}
+                            <option value="{{ value }}"></option>
+                        {% endfor %}
+                    </datalist>
+                {% elif field.name == "station_name" %}
+                    <datalist id="station-options">
+                        {% for value in station_options %}
+                            <option value="{{ value }}"></option>
+                        {% endfor %}
+                    </datalist>
+                {% endif %}
+                {{ field.errors }}
+                {% if field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+            </p>
+        {% endfor %}
+        <button type="submit">Save</button>
+        <a href="{{ cancel_url }}">Cancel</a>
+    </form>
+{% endblock %}
