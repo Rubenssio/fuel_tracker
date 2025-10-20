@@ -3,143 +3,176 @@
 {% block title %}Statistics · Fuel Tracker{% endblock %}
 
 {% block content %}
-<section class="stack-lg">
-    <header class="stack-xs">
-        <h1>Statistics</h1>
-        <p class="muted">Dig into historical performance and compare brands and grades.</p>
-    </header>
-    <form method="get" class="filters">
-        <fieldset>
-            <legend>Filters</legend>
-            <div class="form-field">
-                <label for="statistics-vehicle">Vehicle</label>
-                <select id="statistics-vehicle" name="vehicle">
-                    <option value="all" {% if selected_vehicle == "all" %}selected{% endif %}>All vehicles</option>
-                    {% for vehicle in vehicles %}
-                        <option value="{{ vehicle.id }}" {% if selected_vehicle == vehicle.id|stringformat:"s" %}selected{% endif %}>{{ vehicle.name }}</option>
-                    {% endfor %}
-                </select>
+<div class="stack">
+    <section class="card">
+        <div class="card-header">
+            <div class="stack-xs">
+                <span class="card-title">Statistics</span>
+                <p class="text-muted">Dig into historical performance and compare brands and grades.</p>
             </div>
-            <div class="form-field">
-                <label for="statistics-window">Period</label>
-                <select id="statistics-window" name="window">
-                    {% for option in window_options %}
-                        <option value="{{ option }}" {% if selected_window == option %}selected{% endif %}>
-                            {% if option == "30" %}
-                                Last 30 days
-                            {% elif option == "90" %}
-                                Last 90 days
-                            {% elif option == "ytd" %}
-                                Year to date
-                            {% else %}
-                                All-time
-                            {% endif %}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="row">
-                <button type="submit" class="primary">Apply</button>
-            </div>
-        </fieldset>
-    </form>
-</section>
-
-<section class="stack-md">
-    <h2>Summary</h2>
-    <div class="summary-grid">
-        <article>
-            <h3>Avg consumption ({{ efficiency_label }})</h3>
-            <p>{{ summary.avg_consumption|default:"—" }}</p>
-        </article>
-        <article>
-            <h3>Avg cost per {{ unit_prefs.volume }}</h3>
-            <p>{{ summary.avg_cost_per_volume|default:"—" }}</p>
-        </article>
-        <article>
-            <h3>Total spend</h3>
-            <p>{{ summary.total_spend|default:"—" }}</p>
-        </article>
-        <article>
-            <h3>Total distance</h3>
-            <p>{{ summary.total_distance|default:"—" }}</p>
-        </article>
-        <article>
-            <h3>Avg cost/{{ unit_prefs.distance }}</h3>
-            <p>{{ summary.avg_cost_per_distance|default:"—" }}</p>
-        </article>
-        <article>
-            <h3>Avg distance/day</h3>
-            <p>{{ summary.avg_distance_per_day|default:"—" }}</p>
-        </article>
-    </div>
-</section>
-
-<section class="stack-md">
-    <h2>Cost per {{ unit_prefs.volume }} over time</h2>
-    {% if chart_cost.has_data %}
-        <svg width="{{ chart_cost.width }}" height="{{ chart_cost.height }}" role="img" aria-label="Cost per {{ unit_prefs.volume }} over time">
-            <title>Cost per {{ unit_prefs.volume }} over time</title>
-            <path d="{{ chart_cost.path }}" fill="none" stroke="currentColor" stroke-width="2" />
-        </svg>
-        <div class="chart-meta">
-            <p>Min: {{ chart_cost.y_min }} {{ chart_cost.unit_label }}</p>
-            <p>Max: {{ chart_cost.y_max }} {{ chart_cost.unit_label }}</p>
-            {% if chart_cost.x_labels %}
-                <p>Dates: {{ chart_cost.x_labels|join:" · " }}</p>
-            {% endif %}
         </div>
-    {% else %}
-        <p>No data for the selected period.</p>
-    {% endif %}
-</section>
-
-<section class="stack-md">
-    <h2>Consumption over time</h2>
-    {% if chart_consumption.has_data %}
-        <svg width="{{ chart_consumption.width }}" height="{{ chart_consumption.height }}" role="img" aria-label="Fuel consumption over time">
-            <title>Fuel consumption over time</title>
-            <path d="{{ chart_consumption.path }}" fill="none" stroke="currentColor" stroke-width="2" />
-        </svg>
-        <div class="chart-meta">
-            <p>Min: {{ chart_consumption.y_min }} {{ chart_consumption.unit_label }}</p>
-            <p>Max: {{ chart_consumption.y_max }} {{ chart_consumption.unit_label }}</p>
-            {% if chart_consumption.x_labels %}
-                <p>Dates: {{ chart_consumption.x_labels|join:" · " }}</p>
-            {% endif %}
+        <div class="card-body">
+            <form method="get" class="form grid grid-3">
+                <div class="field">
+                    <label for="statistics-vehicle">Vehicle</label>
+                    <select id="statistics-vehicle" name="vehicle">
+                        <option value="all" {% if selected_vehicle == "all" %}selected{% endif %}>All vehicles</option>
+                        {% for vehicle in vehicles %}
+                            <option value="{{ vehicle.id }}" {% if selected_vehicle == vehicle.id|stringformat:"s" %}selected{% endif %}>{{ vehicle.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="statistics-window">Period</label>
+                    <select id="statistics-window" name="window">
+                        {% for option in window_options %}
+                            <option value="{{ option }}" {% if selected_window == option %}selected{% endif %}>
+                                {% if option == "30" %}
+                                    Last 30 days
+                                {% elif option == "90" %}
+                                    Last 90 days
+                                {% elif option == "ytd" %}
+                                    Year to date
+                                {% else %}
+                                    All-time
+                                {% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="actions" style="align-self:end">
+                    <button type="submit" class="btn btn-primary">Apply</button>
+                </div>
+            </form>
         </div>
-    {% else %}
-        <p>No data for the selected period.</p>
-    {% endif %}
-</section>
+    </section>
 
-<section class="stack-md">
-    <h2>Brand and grade comparison</h2>
-    {% if brand_rows %}
-        <table>
-            <thead>
-                <tr>
-                    <th scope="col">Brand</th>
-                    <th scope="col">Grade</th>
-                    <th scope="col" class="numeric">Avg price</th>
-                    <th scope="col" class="numeric">Avg consumption ({{ efficiency_label }})</th>
-                    <th scope="col" class="numeric">Fill-ups</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in brand_rows %}
-                    <tr>
-                        <td data-label="Brand">{{ row.brand }}</td>
-                        <td data-label="Grade">{{ row.grade }}</td>
-                        <td data-label="Avg price" class="numeric">{{ row.avg_cost_per_volume }}</td>
-                        <td data-label="Avg consumption" class="numeric">{{ row.avg_consumption }}</td>
-                        <td data-label="Fill-ups" class="numeric">{{ row.count }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No data for the selected period.</p>
-    {% endif %}
-</section>
+    <section class="stack">
+        <h2>Summary</h2>
+        <div class="grid grid-3">
+            <article class="card">
+                <div class="card-body">
+                    <h3>Avg consumption ({{ efficiency_label }})</h3>
+                    <p>{{ summary.avg_consumption|default:"—" }}</p>
+                </div>
+            </article>
+            <article class="card">
+                <div class="card-body">
+                    <h3>Avg cost per {{ unit_prefs.volume }}</h3>
+                    <p>{{ summary.avg_cost_per_volume|default:"—" }}</p>
+                </div>
+            </article>
+            <article class="card">
+                <div class="card-body">
+                    <h3>Total spend</h3>
+                    <p>{{ summary.total_spend|default:"—" }}</p>
+                </div>
+            </article>
+            <article class="card">
+                <div class="card-body">
+                    <h3>Total distance</h3>
+                    <p>{{ summary.total_distance|default:"—" }}</p>
+                </div>
+            </article>
+            <article class="card">
+                <div class="card-body">
+                    <h3>Avg cost/{{ unit_prefs.distance }}</h3>
+                    <p>{{ summary.avg_cost_per_distance|default:"—" }}</p>
+                </div>
+            </article>
+            <article class="card">
+                <div class="card-body">
+                    <h3>Avg distance/day</h3>
+                    <p>{{ summary.avg_distance_per_day|default:"—" }}</p>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="grid grid-2">
+        <article class="card">
+            <div class="card-header">
+                <span class="card-title">Cost per {{ unit_prefs.volume }} over time</span>
+            </div>
+            <div class="card-body">
+                {% if chart_cost.has_data %}
+                    <svg width="{{ chart_cost.width }}" height="{{ chart_cost.height }}" role="img" aria-label="Cost per {{ unit_prefs.volume }} over time">
+                        <title>Cost per {{ unit_prefs.volume }} over time</title>
+                        <path d="{{ chart_cost.path }}" fill="none" stroke="currentColor" stroke-width="2" />
+                    </svg>
+                    <div class="chart-meta">
+                        <p>Min: {{ chart_cost.y_min }} {{ chart_cost.unit_label }}</p>
+                        <p>Max: {{ chart_cost.y_max }} {{ chart_cost.unit_label }}</p>
+                        {% if chart_cost.x_labels %}
+                            <p>Dates: {{ chart_cost.x_labels|join:" · " }}</p>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No data for the selected period.</p>
+                {% endif %}
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <span class="card-title">Consumption over time</span>
+            </div>
+            <div class="card-body">
+                {% if chart_consumption.has_data %}
+                    <svg width="{{ chart_consumption.width }}" height="{{ chart_consumption.height }}" role="img" aria-label="Fuel consumption over time">
+                        <title>Fuel consumption over time</title>
+                        <path d="{{ chart_consumption.path }}" fill="none" stroke="currentColor" stroke-width="2" />
+                    </svg>
+                    <div class="chart-meta">
+                        <p>Min: {{ chart_consumption.y_min }} {{ chart_consumption.unit_label }}</p>
+                        <p>Max: {{ chart_consumption.y_max }} {{ chart_consumption.unit_label }}</p>
+                        {% if chart_consumption.x_labels %}
+                            <p>Dates: {{ chart_consumption.x_labels|join:" · " }}</p>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No data for the selected period.</p>
+                {% endif %}
+            </div>
+        </article>
+    </section>
+
+    <section class="card">
+        <div class="card-header">
+            <span class="card-title">Brand and grade comparison</span>
+        </div>
+        {% if brand_rows %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Brand</th>
+                            <th scope="col">Grade</th>
+                            <th scope="col" class="num">Avg price</th>
+                            <th scope="col" class="num">Avg consumption ({{ efficiency_label }})</th>
+                            <th scope="col" class="num">Fill-ups</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in brand_rows %}
+                            <tr>
+                                <td data-label="Brand">{{ row.brand }}</td>
+                                <td data-label="Grade">{{ row.grade }}</td>
+                                <td data-label="Avg price" class="num">{{ row.avg_cost_per_volume }}</td>
+                                <td data-label="Avg consumption" class="num">{{ row.avg_consumption }}</td>
+                                <td data-label="Fill-ups" class="num">{{ row.count }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="card-body empty-state">
+                <img src="{% static 'img/empty-state.svg' %}" alt="No brand comparison illustration">
+                <div class="stack-xs" style="align-items:center">
+                    <p class="text-muted">No data for the selected period.</p>
+                </div>
+            </div>
+        {% endif %}
+    </section>
+</div>
 {% endblock %}

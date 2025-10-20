@@ -3,50 +3,61 @@
 {% block title %}Settings · Fuel Tracker{% endblock %}
 
 {% block content %}
-<section class="stack-lg">
-    <header class="stack-xs">
-        <h1>Profile settings</h1>
-        <p class="muted">Update how Fuel Tracker formats units and displays your information.</p>
-    </header>
-    <form method="post" novalidate>
-        {% csrf_token %}
-        {% if form.non_field_errors %}
-            <ul class="errorlist">
-                {% for error in form.non_field_errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-        {% for field in form %}
-            <div class="form-field">
-                {{ field.label_tag }}
-                {{ field }}
-                {% if field.name == "efficiency_unit" %}
-                    <div class="helptext">Efficiency display is independent of distance/volume preferences.</div>
-                {% elif field.name == "utc_offset_minutes" %}
-                    <div class="helptext">Timestamps are stored in UTC; this offset will be used later for display.</div>
-                {% endif %}
-                {% if field.help_text %}
-                    <div class="helptext">{{ field.help_text }}</div>
-                {% endif %}
-                {% if field.errors %}
+<div class="stack">
+    <section class="card">
+        <div class="card-header">
+            <div class="stack-xs">
+                <span class="card-title">Profile settings</span>
+                <p class="text-muted">Update how Fuel Tracker formats units and displays your information.</p>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="post" novalidate class="form">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
                     <ul class="errorlist">
-                        {% for error in field.errors %}
+                        {% for error in form.non_field_errors %}
                             <li>{{ error }}</li>
                         {% endfor %}
                     </ul>
                 {% endif %}
-            </div>
-        {% endfor %}
-        <div class="row">
-            <button type="submit" class="primary">Save settings</button>
+                {% for field in form %}
+                    <div class="field">
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.name == "efficiency_unit" %}
+                            <div class="helptext">Efficiency display is independent of distance/volume preferences.</div>
+                        {% elif field.name == "utc_offset_minutes" %}
+                            <div class="helptext">Timestamps are stored in UTC; this offset will be used later for display.</div>
+                        {% endif %}
+                        {% if field.help_text %}
+                            <div class="helptext">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% if field.errors %}
+                            <ul class="errorlist">
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <div class="actions">
+                    <button type="submit" class="btn btn-primary">Save settings</button>
+                </div>
+            </form>
         </div>
-    </form>
-    <section class="stack-xs">
-        <h2>Preview</h2>
-        <p>Distance sample: {{ preview.distance }}</p>
-        <p>Volume sample: {{ preview.volume }}</p>
-        <p>Currency sample: {{ preview.currency }}</p>
     </section>
-</section>
+
+    <section class="card" style="max-width:420px;">
+        <div class="card-header">
+            <span class="card-title">Preview</span>
+        </div>
+        <div class="card-body">
+            <p>Distance sample: <strong>{{ preview.distance }}</strong></p>
+            <p>Volume sample: <strong>{{ preview.volume }}</strong></p>
+            <p>Currency sample: <strong>{{ preview.currency }}</strong></p>
+        </div>
+    </section>
+</div>
 {% endblock %}

@@ -3,60 +3,66 @@
 {% block title %}Sign up · Fuel Tracker{% endblock %}
 
 {% block content %}
-<section class="stack-md">
-    <header class="stack-xs">
-        <h1>Create an account</h1>
-        <p class="muted">Set up Fuel Tracker in a minute and start logging fill-ups.</p>
-    </header>
-    <form method="post" novalidate>
-        {% csrf_token %}
-        {% if form.non_field_errors %}
-            <ul class="errorlist">
-                {% for error in form.non_field_errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-        <div class="form-field">
-            <label for="id_email">Email</label>
-            {{ form.email }}
-            {% if form.email.errors %}
-                <ul class="errorlist">
-                    {% for error in form.email.errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
+<section class="stack">
+    <article class="card" style="max-width:540px;margin:0 auto;">
+        <div class="card-header">
+            <div class="stack-xs">
+                <span class="card-title">Create an account</span>
+                <p class="text-muted">Set up Fuel Tracker in a minute and start logging fill-ups.</p>
+            </div>
         </div>
-        <div class="form-field">
-            <label for="id_password1">Password</label>
-            {{ form.password1 }}
-            {% if form.password1.help_text %}
-                <div class="helptext">{{ form.password1.help_text|safe }}</div>
-            {% endif %}
-            {% if form.password1.errors %}
-                <ul class="errorlist">
-                    {% for error in form.password1.errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
+        <div class="card-body">
+            <form method="post" novalidate class="form">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <ul class="errorlist">
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <div class="field">
+                    <label for="id_email">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.email.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                <div class="field">
+                    <label for="id_password1">Password</label>
+                    {{ form.password1 }}
+                    {% if form.password1.help_text %}
+                        <div class="helptext">{{ form.password1.help_text|safe }}</div>
+                    {% endif %}
+                    {% if form.password1.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.password1.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                <div class="field">
+                    <label for="id_password2">Confirm password</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.password2.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                <div class="actions">
+                    <button type="submit" class="btn btn-primary">Sign up</button>
+                    <a class="btn btn-secondary" href="{% url 'accounts:signin' %}">Already have an account?</a>
+                </div>
+            </form>
         </div>
-        <div class="form-field">
-            <label for="id_password2">Confirm password</label>
-            {{ form.password2 }}
-            {% if form.password2.errors %}
-                <ul class="errorlist">
-                    {% for error in form.password2.errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-        </div>
-        <div class="row">
-            <button type="submit" class="primary">Sign up</button>
-            <a class="button secondary" href="/auth/signin">Already have an account?</a>
-        </div>
-    </form>
+    </article>
 </section>
 {% endblock %}

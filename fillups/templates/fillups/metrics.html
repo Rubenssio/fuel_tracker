@@ -3,95 +3,122 @@
 {% block title %}Metrics · Fuel Tracker{% endblock %}
 
 {% block content %}
-<section class="stack-lg">
-    <header class="stack-xs">
-        <h1>Metrics</h1>
-        <p class="muted">See rolling trends for cost, consumption, and distance.</p>
-    </header>
-    <form method="get" class="filters">
-        <fieldset>
-            <legend>View options</legend>
-            <div class="form-field">
-                <label for="metrics-vehicle">Vehicle</label>
-                <select id="metrics-vehicle" name="vehicle">
-                    <option value="all" {% if selected_vehicle == "all" %}selected{% endif %}>All vehicles</option>
-                    {% for vehicle in vehicles %}
-                        <option value="{{ vehicle.id }}" {% if selected_vehicle == vehicle.id|stringformat:"s" %}selected{% endif %}>{{ vehicle.name }}</option>
-                    {% endfor %}
-                </select>
+<div class="stack">
+    <section class="card">
+        <div class="card-header">
+            <div class="stack-xs">
+                <span class="card-title">Metrics</span>
+                <p class="text-muted">See rolling trends for cost, consumption, and distance.</p>
             </div>
-            <div class="form-field">
-                <label for="metrics-window">Window</label>
-                <select id="metrics-window" name="window">
-                    <option value="30" {% if window == "30" %}selected{% endif %}>Last 30 days</option>
-                    <option value="90" {% if window == "90" %}selected{% endif %}>Last 90 days</option>
-                    <option value="ytd" {% if window == "ytd" %}selected{% endif %}>Year to date</option>
-                </select>
-            </div>
-            <div class="row">
-                <button type="submit" class="primary">Apply</button>
-            </div>
-        </fieldset>
-    </form>
-</section>
+        </div>
+        <div class="card-body">
+            <form method="get" class="form grid grid-3">
+                <div class="field">
+                    <label for="metrics-vehicle">Vehicle</label>
+                    <select id="metrics-vehicle" name="vehicle">
+                        <option value="all" {% if selected_vehicle == "all" %}selected{% endif %}>All vehicles</option>
+                        {% for vehicle in vehicles %}
+                            <option value="{{ vehicle.id }}" {% if selected_vehicle == vehicle.id|stringformat:"s" %}selected{% endif %}>{{ vehicle.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="metrics-window">Window</label>
+                    <select id="metrics-window" name="window">
+                        <option value="30" {% if window == "30" %}selected{% endif %}>Last 30 days</option>
+                        <option value="90" {% if window == "90" %}selected{% endif %}>Last 90 days</option>
+                        <option value="ytd" {% if window == "ytd" %}selected{% endif %}>Year to date</option>
+                    </select>
+                </div>
+                <div class="actions" style="align-self:end">
+                    <button type="submit" class="btn btn-primary">Apply</button>
+                </div>
+            </form>
+        </div>
+    </section>
 
-<section class="stack-md">
-    <h2>Rolling ({{ window_label }})</h2>
-    <div class="summary-grid">
-        <article>
-            <h3>Avg cost per {{ unit_prefs.volume }}</h3>
-            <p>{{ rolling_metrics.avg_cost_per_volume|default:"—" }}</p>
-        </article>
-        <article>
-            <h3>Avg consumption ({{ efficiency_label }})</h3>
-            <p>{{ rolling_metrics.avg_consumption|default:"—" }}</p>
-        </article>
-        <article>
-            <h3>Avg distance/day</h3>
-            <p>{{ rolling_metrics.avg_distance_per_day|default:"—" }}</p>
-        </article>
-        <article>
-            <h3>Avg cost/{{ unit_prefs.distance }}</h3>
-            <p>{{ rolling_metrics.avg_cost_per_distance|default:"—" }}</p>
-        </article>
-        <article>
-            <h3>Total spend</h3>
-            <p>{{ rolling_metrics.total_spend|default:"—" }}</p>
-        </article>
-        <article>
-            <h3>Total distance</h3>
-            <p>{{ rolling_metrics.total_distance|default:"—" }}</p>
-        </article>
-    </div>
-</section>
+    <section class="stack">
+        <h2>Rolling ({{ window_label }})</h2>
+        <div class="grid grid-3">
+            <article class="card">
+                <div class="card-body">
+                    <h3>Avg cost per {{ unit_prefs.volume }}</h3>
+                    <p>{{ rolling_metrics.avg_cost_per_volume|default:"—" }}</p>
+                </div>
+            </article>
+            <article class="card">
+                <div class="card-body">
+                    <h3>Avg consumption ({{ efficiency_label }})</h3>
+                    <p>{{ rolling_metrics.avg_consumption|default:"—" }}</p>
+                </div>
+            </article>
+            <article class="card">
+                <div class="card-body">
+                    <h3>Avg distance/day</h3>
+                    <p>{{ rolling_metrics.avg_distance_per_day|default:"—" }}</p>
+                </div>
+            </article>
+            <article class="card">
+                <div class="card-body">
+                    <h3>Avg cost/{{ unit_prefs.distance }}</h3>
+                    <p>{{ rolling_metrics.avg_cost_per_distance|default:"—" }}</p>
+                </div>
+            </article>
+            <article class="card">
+                <div class="card-body">
+                    <h3>Total spend</h3>
+                    <p>{{ rolling_metrics.total_spend|default:"—" }}</p>
+                </div>
+            </article>
+            <article class="card">
+                <div class="card-body">
+                    <h3>Total distance</h3>
+                    <p>{{ rolling_metrics.total_distance|default:"—" }}</p>
+                </div>
+            </article>
+        </div>
+    </section>
 
-<section class="stack-md">
-    <h2>All-time</h2>
-    <div class="summary-grid">
-        <article>
-            <h3>Avg cost per {{ unit_prefs.volume }}</h3>
-            <p>{{ all_time_metrics.avg_cost_per_volume|default:"—" }}</p>
-        </article>
-        <article>
-            <h3>Avg consumption ({{ efficiency_label }})</h3>
-            <p>{{ all_time_metrics.avg_consumption|default:"—" }}</p>
-        </article>
-        <article>
-            <h3>Avg distance/day</h3>
-            <p>{{ all_time_metrics.avg_distance_per_day|default:"—" }}</p>
-        </article>
-        <article>
-            <h3>Avg cost/{{ unit_prefs.distance }}</h3>
-            <p>{{ all_time_metrics.avg_cost_per_distance|default:"—" }}</p>
-        </article>
-        <article>
-            <h3>Total spend</h3>
-            <p>{{ all_time_metrics.total_spend|default:"—" }}</p>
-        </article>
-        <article>
-            <h3>Total distance</h3>
-            <p>{{ all_time_metrics.total_distance|default:"—" }}</p>
-        </article>
-    </div>
-</section>
+    <section class="stack">
+        <h2>All-time</h2>
+        <div class="grid grid-3">
+            <article class="card">
+                <div class="card-body">
+                    <h3>Avg cost per {{ unit_prefs.volume }}</h3>
+                    <p>{{ all_time_metrics.avg_cost_per_volume|default:"—" }}</p>
+                </div>
+            </article>
+            <article class="card">
+                <div class="card-body">
+                    <h3>Avg consumption ({{ efficiency_label }})</h3>
+                    <p>{{ all_time_metrics.avg_consumption|default:"—" }}</p>
+                </div>
+            </article>
+            <article class="card">
+                <div class="card-body">
+                    <h3>Avg distance/day</h3>
+                    <p>{{ all_time_metrics.avg_distance_per_day|default:"—" }}</p>
+                </div>
+            </article>
+            <article class="card">
+                <div class="card-body">
+                    <h3>Avg cost/{{ unit_prefs.distance }}</h3>
+                    <p>{{ all_time_metrics.avg_cost_per_distance|default:"—" }}</p>
+                </div>
+            </article>
+            <article class="card">
+                <div class="card-body">
+                    <h3>Total spend</h3>
+                    <p>{{ all_time_metrics.total_spend|default:"—" }}</p>
+                </div>
+            </article>
+            <article class="card">
+                <div class="card-body">
+                    <h3>Total distance</h3>
+                    <p>{{ all_time_metrics.total_distance|default:"—" }}</p>
+                </div>
+            </article>
+        </div>
+    </section>
+</div>
 {% endblock %}

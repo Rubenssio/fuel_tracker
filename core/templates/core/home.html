@@ -3,35 +3,89 @@
 {% block title %}Fuel Tracker{% endblock %}
 
 {% block content %}
-<section class="stack-lg">
-    <header class="stack-sm">
-        <h1>Fuel Tracker</h1>
-        <p class="muted">Stay on top of your vehicles, fuel economy, and spending in one place.</p>
-    </header>
-    {% if request.user.is_authenticated %}
-        <div class="grid-2">
-            <article class="stack-sm">
-                <h2>Quick actions</h2>
-                <ul class="stack-xs">
-                    <li><a href="/fillups/add?next={{ request.get_full_path|urlencode }}">Log your next fill-up</a></li>
-                    <li><a href="/vehicles">Manage vehicles</a></li>
-                    <li><a href="/history">Review recent fill-ups</a></li>
-                </ul>
-            </article>
-            <article class="stack-sm">
-                <h2>Need to adjust settings?</h2>
-                <p>Update your units, currency, and profile details any time.</p>
-                <a class="button secondary" href="/settings">Go to settings</a>
-            </article>
-        </div>
-    {% else %}
-        <div class="stack-sm">
-            <p>Track vehicles, analyse fuel costs, and stay informed about your driving habits.</p>
-            <div class="row">
-                <a class="button primary" href="/auth/signup">Create an account</a>
-                <a class="button secondary" href="/auth/signin">Sign in</a>
+<div class="stack">
+    <section class="card">
+        <div class="card-body hero">
+            <div class="stack-sm">
+                <span class="badge badge-success">Smarter fuel insights</span>
+                <h1>Stay ahead of every fill-up</h1>
+                <p class="text-muted">Fuel Tracker brings your vehicles, fuel economy, and spending trends together so you can drive with confidence.</p>
+                <div class="actions">
+                    {% if request.user.is_authenticated %}
+                        <a href="{% url 'fillup-add' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-primary"><img src="{% static 'icons/plus.svg' %}" class="icon" alt=""> Log a fill-up</a>
+                        <a href="{% url 'vehicle-list' %}" class="btn btn-secondary"><img src="{% static 'icons/car.svg' %}" class="icon" alt=""> Manage vehicles</a>
+                    {% else %}
+                        <a href="{% url 'accounts:signup' %}" class="btn btn-primary">Create an account</a>
+                        <a href="{% url 'accounts:signin' %}" class="btn btn-secondary">Sign in</a>
+                    {% endif %}
+                </div>
             </div>
+            <img src="{% static 'img/hero.svg' %}" alt="Fuel Tracker overview illustration">
         </div>
+    </section>
+
+    {% if request.user.is_authenticated %}
+        <section class="grid grid-3">
+            <article class="card">
+                <div class="card-header">
+                    <div class="actions" style="align-items:center;gap:8px">
+                        <img src="{% static 'icons/history.svg' %}" class="icon" alt="">
+                        <span class="card-title">Recent fill-ups</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Jump back into your latest entries and keep your log spotless.</p>
+                    <a href="{% url 'history-list' %}" class="btn btn-primary">View history</a>
+                </div>
+            </article>
+            <article class="card">
+                <div class="card-header">
+                    <div class="actions" style="align-items:center;gap:8px">
+                        <img src="{% static 'icons/chart.svg' %}" class="icon" alt="">
+                        <span class="card-title">Metrics</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">See how fuel costs and efficiency trend over your chosen window.</p>
+                    <a href="{% url 'metrics' %}" class="btn btn-secondary">Open metrics</a>
+                </div>
+            </article>
+            <article class="card">
+                <div class="card-header">
+                    <div class="actions" style="align-items:center;gap:8px">
+                        <img src="{% static 'icons/settings.svg' %}" class="icon" alt="">
+                        <span class="card-title">Profile preferences</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Adjust units, currency, and personal details in one place.</p>
+                    <a href="{% url 'profiles:settings' %}" class="btn btn-secondary">Update settings</a>
+                </div>
+            </article>
+        </section>
+    {% else %}
+        <section class="card">
+            <div class="card-body stack-sm">
+                <h2>What you get</h2>
+                <div class="grid grid-3">
+                    <div class="stack-xs">
+                        <img src="{% static 'icons/stats.svg' %}" class="icon" alt="">
+                        <strong>Insightful stats</strong>
+                        <p class="text-muted">Track cost per mile, efficiency, and more with clean dashboards.</p>
+                    </div>
+                    <div class="stack-xs">
+                        <img src="{% static 'icons/history.svg' %}" class="icon" alt="">
+                        <strong>Organised history</strong>
+                        <p class="text-muted">Filter and review every fill-up whenever you need it.</p>
+                    </div>
+                    <div class="stack-xs">
+                        <img src="{% static 'icons/settings.svg' %}" class="icon" alt="">
+                        <strong>Personalised units</strong>
+                        <p class="text-muted">Use the units and currency that work best for you.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
     {% endif %}
-</section>
+</div>
 {% endblock %}
