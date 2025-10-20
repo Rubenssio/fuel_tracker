@@ -3,16 +3,17 @@
 {% block title %}Sign in · Fuel Tracker{% endblock %}
 
 {% block content %}
-<section class="stack">
-    <article class="card" style="max-width:540px;margin:0 auto;">
-        <div class="card-header">
-            <div class="stack-xs">
-                <span class="card-title">Sign in</span>
-                <p class="text-muted">Access your vehicles, fill-ups, and metrics.</p>
+<section class="row justify-content-center">
+    <div class="col-12 col-lg-7 col-xl-5">
+        <article class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 pb-0">
+                <div class="stack-xs">
+                    <span class="card-title">Sign in</span>
+                    <p class="text-muted mb-0">Access your vehicles, fill-ups, and metrics.</p>
+                </div>
             </div>
-        </div>
-        <div class="card-body">
-            <form method="post" novalidate class="form">
+            <div class="card-body p-4">
+                <form method="post" novalidate class="form">
                 {% csrf_token %}
                 {% if next %}
                     <input type="hidden" name="next" value="{{ next }}">
@@ -24,7 +25,7 @@
                         {% endfor %}
                     </ul>
                 {% endif %}
-                <div class="field">
+                <div class="field mb-3">
                     <label for="id_username">Email</label>
                     {{ form.username }}
                     {% if form.username.errors %}
@@ -35,7 +36,7 @@
                         </ul>
                     {% endif %}
                 </div>
-                <div class="field">
+                <div class="field mb-3">
                     <label for="id_password">Password</label>
                     {{ form.password }}
                     {% if form.password.errors %}
@@ -46,12 +47,13 @@
                         </ul>
                     {% endif %}
                 </div>
-                <div class="actions">
+                <div class="actions d-flex flex-wrap gap-2 mt-3">
                     <button type="submit" class="btn btn-primary">Sign in</button>
                     <a class="btn btn-secondary" href="{% url 'accounts:signup' %}">Need an account?</a>
                 </div>
             </form>
         </div>
     </article>
+    </div>
 </section>
 {% endblock %}
